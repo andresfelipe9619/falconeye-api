@@ -1,60 +1,69 @@
-'use strict';
+"use strict";
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('MaintenanceCosts', {
+    return queryInterface.createTable("gs_maintenance_cost", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       mainStreet: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+      },
+      reliability: {
+        type: Sequelize.STRING,
       },
       secondStreet: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       orders: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
-      internalId: {
-        type: Sequelize.INTEGER
+      internalID: {
+        type: Sequelize.INTEGER,
       },
-      intersectionId: {
-        type: Sequelize.INTEGER
+      latitude: {
+        type: Sequelize.DOUBLE,
+      },
+      longitude: {
+        type: Sequelize.DOUBLE,
+      },
+      intersectionID: {
+        type: Sequelize.INTEGER,
       },
       center: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       corrective: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       engineering: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       preventive: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       equipments: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       materials: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       services: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('MaintenanceCosts');
-  }
+    return queryInterface.dropTable("gs_maintenance_cost");
+  },
 };

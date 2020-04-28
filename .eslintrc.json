@@ -3,7 +3,8 @@
   "extends": ["plugin:prettier/recommended"],
   "plugins": ["prettier"],
   "rules": {
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "comma-dangle": "off"
   },
   "parserOptions": {
     "ecmaVersion": 8

@@ -23,18 +23,13 @@ app.use(bodyParser.json());
 
 app.get("/maintenances", async (req, res) => {
   try {
-    const maintenances = await models.MaintenanceCosts.findAll({
-      include: [
-        {
-          model: models.Coordinates,
-          required: true,
-          as: "coordinates",
-        },
-      ],
-      order: [["internalId", "ASC"]],
+    console.log('models', Object.keys(models))
+    const maintenances = await models.gs_maintenance_cost.findAll({
+      order: [["internalID", "ASC"]],
     });
     return res.status(200).json({ data: maintenances });
   } catch (error) {
+    console.log('error', error);
     return res.status(500).send(error.message);
   }
 });

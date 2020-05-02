@@ -38,6 +38,9 @@ module.exports = {
       corrective: {
         type: Sequelize.DOUBLE,
       },
+      items: {
+        type: Sequelize.DOUBLE,
+      },
       engineering: {
         type: Sequelize.DOUBLE,
       },

@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       internalID: DataTypes.INTEGER,
       intersectionID: DataTypes.INTEGER,
       center: DataTypes.DOUBLE,
+      items: DataTypes.DOUBLE,
       latitude: DataTypes.DOUBLE,
       longitude: DataTypes.DOUBLE,
       corrective: DataTypes.DOUBLE,

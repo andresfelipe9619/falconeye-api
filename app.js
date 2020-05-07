@@ -33,7 +33,7 @@ app.get("/maintenances", async (req, res) => {
         totalCosts: m.equipments + m.materials + m.services,
       };
     });
-    console.log("maintenances", maintenances);
+    
     const maintenancesCosts = maintenances.map((m) => m.totalCosts);
     const maxCost = Math.max(...maintenancesCosts);
     const minCost = Math.min(...maintenancesCosts);

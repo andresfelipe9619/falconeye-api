@@ -23,13 +23,52 @@ app.use(bodyParser.json());
 
 app.get("/maintenances", async (req, res) => {
   try {
-    console.log('models', Object.keys(models))
-    const maintenances = await models.gs_maintenance_cost.findAll({
+    let maintenances = await models.gs_maintenance_cost.findAll({
       order: [["internalID", "ASC"]],
     });
-    return res.status(200).json({ data: maintenances });
+    maintenances = maintenances.map((m) => {
+      m = m.toJSON();
+      return {
+        ...m,
+        totalCosts: m.equipments + m.materials + m.services,
+      };
+    });
+    console.log("maintenances", maintenances);
+    const maintenancesCosts = maintenances.map((m) => m.totalCosts);
+    const maxCost = Math.max(...maintenancesCosts);
+    const minCost = Math.min(...maintenancesCosts);
+    const rangeCount = 5;
+    const rangeValue = +((maxCost - minCost) / rangeCount).toFixed(2);
+    const ranges = new Array(rangeCount).fill(0).map((_, i) => {
+      if (i === 0) return minCost;
+      if (i === rangeCount - 1) return maxCost;
+      return rangeValue * i;
+    });
+    const sum = (list, prop) => list.reduce((acc, item) => acc + item[prop], 0);
+
+    const totalCosts = sum(maintenances, "orders");
+    const totalPreventive = sum(maintenances, "preventive");
+    const totalEngineering = sum(maintenances, "engineering");
+    const totalCorrective = sum(maintenances, "corrective");
+    const totalMaterials = sum(maintenances, "materials");
+    const totalServices = sum(maintenances, "services");
+    const totalEquipments = sum(maintenances, "equipments");
+
+    return res.status(200).json({
+      ranges,
+      minCost,
+      maxCost,
+      totalCosts,
+      maintenances,
+      totalServices,
+      totalMaterials,
+      totalEquipments,
+      totalCorrective,
+      totalPreventive,
+      totalEngineering,
+    });
   } catch (error) {
-    console.log('error', error);
+    console.log("error", error);
     return res.status(500).send(error.message);
   }
 });

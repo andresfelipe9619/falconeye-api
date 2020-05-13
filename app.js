@@ -42,7 +42,7 @@ app.get("/maintenances", async (req, res) => {
     const rangesOrder = new Array(rangeCountOrder).fill(0).map((_, i) => {
       if (i === 0) return minOrder;
       if (i === rangeCountOrder - 1) return maxOrder;
-      return +(rangeValueOrder * i).toFixed(2);
+      return Math.trunc(rangeValueOrder * i);
     });
 
     const maintenancesCosts = maintenances.map((m) => m.totalCosts);

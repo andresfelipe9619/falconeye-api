@@ -33,20 +33,32 @@ app.get("/maintenances", async (req, res) => {
         totalCosts: m.equipments + m.materials + m.services,
       };
     });
-    
+
+    const maintenancesOrders = maintenances.map((m) => m.orders);
+    const maxOrder = Math.max(...maintenancesOrders);
+    const minOrder = Math.min(...maintenancesOrders);
+    const rangeCountOrder = 5;
+    const rangeValueOrder = +((maxOrder - minOrder) / rangeCountOrder);
+    const rangesOrder = new Array(rangeCountOrder).fill(0).map((_, i) => {
+      if (i === 0) return minOrder;
+      if (i === rangeCountOrder - 1) return maxOrder;
+      return +(rangeValueOrder * i).toFixed(2);
+    });
+
     const maintenancesCosts = maintenances.map((m) => m.totalCosts);
     const maxCost = Math.max(...maintenancesCosts);
     const minCost = Math.min(...maintenancesCosts);
     const rangeCount = 5;
-    const rangeValue = +((maxCost - minCost) / rangeCount).toFixed(2);
+    const rangeValue = +((maxCost - minCost) / rangeCount);
     const ranges = new Array(rangeCount).fill(0).map((_, i) => {
       if (i === 0) return minCost;
       if (i === rangeCount - 1) return maxCost;
-      return rangeValue * i;
+      return +(rangeValue * i).toFixed(2);
     });
     const sum = (list, prop) => list.reduce((acc, item) => acc + item[prop], 0);
 
-    const totalCosts = sum(maintenances, "orders");
+    const totalOrders = sum(maintenances, "orders");
+    const totalCosts = sum(maintenances, "totalCosts");
     const totalPreventive = sum(maintenances, "preventive");
     const totalEngineering = sum(maintenances, "engineering");
     const totalCorrective = sum(maintenances, "corrective");
@@ -58,7 +70,11 @@ app.get("/maintenances", async (req, res) => {
       ranges,
       minCost,
       maxCost,
+      maxOrder,
+      minOrder,
       totalCosts,
+      totalOrders,
+      rangesOrder,
       maintenances,
       totalServices,
       totalMaterials,

@@ -37,23 +37,21 @@ app.get("/maintenances", async (req, res) => {
     const maintenancesOrders = maintenances.map((m) => m.orders);
     const maxOrder = Math.max(...maintenancesOrders);
     const minOrder = Math.min(...maintenancesOrders);
-    const rangeCountOrder = 5;
-    const rangeValueOrder = +((maxOrder - minOrder) / rangeCountOrder);
-    const rangesOrder = new Array(rangeCountOrder).fill(0).map((_, i) => {
+    const rangeCountOrder = 4;
+    const rangeValueOrder = Math.ceil((maxOrder - minOrder) / rangeCountOrder);
+    const rangesOrder = new Array(rangeCountOrder + 1).fill(0).map((_, i) => {
       if (i === 0) return minOrder;
-      if (i === rangeCountOrder - 1) return maxOrder;
-      return Math.trunc(rangeValueOrder * i);
+      return Math.ceil(rangeValueOrder * i + minOrder);
     });
 
     const maintenancesCosts = maintenances.map((m) => m.totalCosts);
     const maxCost = Math.max(...maintenancesCosts);
     const minCost = Math.min(...maintenancesCosts);
-    const rangeCount = 5;
-    const rangeValue = +((maxCost - minCost) / rangeCount);
-    const ranges = new Array(rangeCount).fill(0).map((_, i) => {
+    const rangeCount = 4;
+    const rangeValue = Math.ceil((maxCost - minCost) / rangeCount);
+    const ranges = new Array(rangeCount + 1).fill(0).map((_, i) => {
       if (i === 0) return minCost;
-      if (i === rangeCount - 1) return maxCost;
-      return +(rangeValue * i).toFixed(2);
+      return Math.ceil(rangeValue * i + minCost);
     });
     const sum = (list, prop) => list.reduce((acc, item) => acc + item[prop], 0);
 

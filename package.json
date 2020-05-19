@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js",
+    "model:generate": "sequelize model:generate",
     "start:db": "sequelize db:migrate && sequelize db:seed:all",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

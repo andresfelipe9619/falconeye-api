@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     "sg_markers",
     {
       name: DataTypes.STRING,
-      colorName: DataTypes.STRING,
+      color: DataTypes.STRING,
     },
     {
       tableName: "sg_markers",

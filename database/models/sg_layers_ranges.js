@@ -35,8 +35,8 @@ module.exports = (sequelize, DataTypes) => {
   sg_layers_ranges.associate = function (models) {
     // associations can be defined here
     models.sg_numRanges.belongsToMany(models.sg_layers, {
-      otherKey: "rangesId",
-      foreignKey: "layersId",
+      otherKey: "layersId",
+      foreignKey: "rangesId",
       through: sg_layers_ranges,
     });
     models.sg_layers.belongsToMany(models.sg_numRanges, {
@@ -45,8 +45,8 @@ module.exports = (sequelize, DataTypes) => {
       through: sg_layers_ranges,
     });
     models.sg_numRanges.belongsToMany(models.sg_markers, {
-      otherKey: "rangesId",
-      foreignKey: "markersId",
+      otherKey: "markersId",
+      foreignKey: "rangesId",
       through: sg_layers_ranges,
     });
     models.sg_markers.belongsToMany(models.sg_numRanges, {

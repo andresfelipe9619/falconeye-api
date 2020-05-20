@@ -83,12 +83,14 @@ app.get("/maintenances", async (req, res) => {
       if (i === 0) return minOrder;
       return Math.ceil(rangeValueOrder * i + minOrder);
     });
-
+    const log10 = (n) => Math.floor((100 * Math.log(n)) / Math.log(10) / 100);
     const maintenancesCosts = maintenances.map((m) => m.totalCosts);
     const maxCost = Math.max(...maintenancesCosts);
     const minCost = Math.min(...maintenancesCosts);
     const rangeCount = 4;
-    const rangeValue = Math.ceil((maxCost - minCost) / rangeCount);
+    const difference = Math.ceil((maxCost - minCost) / rangeCount);
+    const pow = Math.pow(10, log10(difference) - 1);
+    const rangeValue = Math.round(difference / pow) * pow;
     const ranges = new Array(rangeCount + 1).fill(0).map((_, i) => {
       if (i === 0) return minCost;
       return Math.ceil(rangeValue * i + minCost);

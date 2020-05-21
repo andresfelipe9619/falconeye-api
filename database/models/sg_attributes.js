@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     "sg_attributes",
     {
       name: DataTypes.STRING,
+      property: DataTypes.STRING,
     },
     {
       tableName: "sg_attributes"

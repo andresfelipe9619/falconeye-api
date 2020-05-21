@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     "sg_layers",
     {
       name: DataTypes.STRING,
+      property: DataTypes.STRING,
       description: DataTypes.TEXT,
       state: DataTypes.STRING,
     },

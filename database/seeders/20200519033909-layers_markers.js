@@ -20,6 +20,7 @@ module.exports = {
 const SG_LAYERS = [
   {
     name: "General",
+    property: "default",
     createdAt: new Date(),
     updatedAt: new Date(),
     state: "Y",
@@ -27,6 +28,7 @@ const SG_LAYERS = [
   },
   {
     name: "Rango monetario",
+    property: "monetary-range",
     createdAt: new Date(),
     updatedAt: new Date(),
     state: "Y",
@@ -34,6 +36,7 @@ const SG_LAYERS = [
   },
   {
     name: "Cantidad de órdenes",
+    property: "orders-range",
     createdAt: new Date(),
     updatedAt: new Date(),
     state: "Y",
@@ -42,13 +45,13 @@ const SG_LAYERS = [
 ];
 
 const SG_ATTRIBUTES = [
-  { name: "Centro", createdAt: new Date(), updatedAt: new Date() },
-  { name: "Correctivo", createdAt: new Date(), updatedAt: new Date() },
-  { name: "Ingeniería", createdAt: new Date(), updatedAt: new Date() },
-  { name: "Preventivo", createdAt: new Date(), updatedAt: new Date() },
-  { name: "Equipos", createdAt: new Date(), updatedAt: new Date() },
-  { name: "Materiales", createdAt: new Date(), updatedAt: new Date() },
-  { name: "Servicios", createdAt: new Date(), updatedAt: new Date() },
+  { name: "Centro", property: "center", createdAt: new Date(), updatedAt: new Date() },
+  { name: "Correctivo", property: "corrective", createdAt: new Date(), updatedAt: new Date() },
+  { name: "Ingeniería", property: "engineering", createdAt: new Date(), updatedAt: new Date() },
+  { name: "Preventivo", property: "preventive", createdAt: new Date(), updatedAt: new Date() },
+  { name: "Equipos", property: "equipment", createdAt: new Date(), updatedAt: new Date() },
+  { name: "Materiales", property: "materials", createdAt: new Date(), updatedAt: new Date() },
+  { name: "Servicios", property: "services", createdAt: new Date(), updatedAt: new Date() },
 ];
 
 const SG_LAYERS_ATTRIBUTES = [

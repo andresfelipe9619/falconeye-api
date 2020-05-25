@@ -1,12 +1,19 @@
 {
-  "parser": "babel-eslint",
-  "extends": ["plugin:prettier/recommended"],
-  "plugins": ["prettier"],
-  "rules": {
-    "prettier/prettier": "error",
-    "comma-dangle": "off"
+  "parserOptions": { 
+    "ecmaVersion": 2018 
   },
-  "parserOptions": {
-    "ecmaVersion": 8
-  }
-}
+  "env": { 
+    "es6": true, 
+    "node": true, 
+    "mocha": true 
+  }, 
+  "parser": "babel-eslint", 
+  "rules": { 
+    "no-console": "warn", 
+    "no-use-before-define": "warn", 
+    "spaced-comment": "warn" 
+  }, 
+  "extends": [ 
+    "standard" 
+  ]
+} 

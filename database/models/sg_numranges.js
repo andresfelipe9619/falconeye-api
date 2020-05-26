@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     "sg_numRanges",
     {
       name: DataTypes.STRING,
+      displayName: DataTypes.STRING,
     },
     {
       tableName: "sg_numRanges",

@@ -152,7 +152,7 @@ const getVisitsData = async (models) => {
   const result = {
     title: "Visitas",
     accumulated: oldVisits.conteo,
-    currentDate: localDate,
+    currentDate: "Abril 2020",
     currentValue: currentVisits.conteo,
   };
   return result;

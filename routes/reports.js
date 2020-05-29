@@ -138,13 +138,13 @@ const getVisitsStatusesData = (models) => async (statuses, totalVisits) => {
 
 const getVisitsData = async (models) => {
   const [oldVisits] = await models.sequelize.query(
-    `SELECT COUNT(*) as conteo FROM falconeye.fs_maintenance
+    `SELECT COUNT(*) as conteo FROM fs_maintenance
           WHERE ${betweenOldDates}
          `,
     selectType
   );
   const [currentVisits] = await models.sequelize.query(
-    `SELECT COUNT(*) as conteo FROM falconeye.fs_maintenance
+    `SELECT COUNT(*) as conteo FROM fs_maintenance
             WHERE ${betweenCurrentMonth}
            `,
     selectType

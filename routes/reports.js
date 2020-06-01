@@ -42,9 +42,9 @@ const statuses = [
 ];
 
 const activitiesTypes = [
-  { name: "Correctivo", color: "#4caf50" },
-  { name: "Preventivo", color: "#f44336" },
-  { name: "Ingenieria", color: "#3f51b5" }
+  { name: "Correctivo", color: "#66bb6a" },
+  { name: "Preventivo", color: "#ef5350" },
+  { name: "Ingenieria", color: "#42a5f5" }
 ];
 // -----------------ECONOMIC REPORT------------------------
 const economicReport = (models) => async (req, res) => {
@@ -106,7 +106,7 @@ const geLineData = async (models) => {
   const data = await Promise.all(
     activitiesTypes.map(({ name, color }) => action({ name, color }))
   );
-  const total = await action({ name: "Total", color: "#ffa21a" }, "Aprobada", true)
+  const total = await action({ name: "Total", color: "#ffee58" }, "Aprobada", true)
   return [...data, total];
 };
 
@@ -122,7 +122,7 @@ const getPieData = async (models) => {
 const getTechnicalRankingData = async models => {
   const action = getRankingByType(models);
   const data = await Promise.all(
-    activitiesTypes.map(({ name, color }) => action({ name, color }))
+    activitiesTypes.map(({ name }) => action({ name, color: "#5c6bc0" }))
   );
   return data;
 }

@@ -72,7 +72,29 @@ const technicalDetailReport = (models) => async (req, res) => {
   try {
     const pieData = await getPieData(models);
     const lineData = await geLineData(models);
-    return res.json({ pieData, lineData });
+    const rankingData = await getTechnicalRankingData(models)
+
+    return res.json({ pieData, lineData, rankingData });
+  } catch (error) {
+    console.log("Error", error);
+    return res.status(500).send(error);
+  }
+};
+
+const technicalReport = (models) => async (req, res) => {
+  try {
+    const visitsData = await getVisitsData(models);
+    const visitsStatusesData = await getVisitsStatusesData(models)(
+      statuses,
+      visitsData.currentValue
+    );
+    const mostVisited = await getMostVisitedData(models);
+    const lineData = await geLineData(models);
+    return res.json({
+      mostVisited,
+      lineData,
+      kpi: [visitsData, ...visitsStatusesData]
+    });
   } catch (error) {
     console.log("Error", error);
     return res.status(500).send(error);
@@ -81,12 +103,11 @@ const technicalDetailReport = (models) => async (req, res) => {
 
 const geLineData = async (models) => {
   const action = getTotalMaintenancesByType(models);
-  // const data = await action("Correctivo");
   const data = await Promise.all(
     activitiesTypes.map(({ name, color }) => action({ name, color }))
   );
-  console.log("data", data);
-  return data;
+  const total = await action({ name: "Total", color: "#ffa21a" }, "Aprobada", true)
+  return [...data, total];
 };
 
 const getPieData = async (models) => {
@@ -97,6 +118,14 @@ const getPieData = async (models) => {
   const data = [first, second, third].map(reduceToPieObject);
   return data;
 };
+
+const getTechnicalRankingData = async models => {
+  const action = getRankingByType(models);
+  const data = await Promise.all(
+    activitiesTypes.map(({ name, color }) => action({ name, color }))
+  );
+  return data;
+}
 
 const reduceToPieObject = (array) =>
   !Array.isArray(array)
@@ -144,24 +173,6 @@ const queryByCoAttributes = (models) => (first, second) =>
     selectType
   );
 
-const technicalReport = (models) => async (req, res) => {
-  try {
-    const visitsData = await getVisitsData(models);
-    const visitsStatusesData = await getVisitsStatusesData(models)(
-      statuses,
-      visitsData.currentValue
-    );
-    const mostVisited = await getMostVisitedData(models);
-    return res.json({
-      mostVisited,
-      kpi: [visitsData, ...visitsStatusesData]
-    });
-  } catch (error) {
-    console.log("Error", error);
-    return res.status(500).send(error);
-  }
-};
-
 const mostVisitedByYear = (models) => (year) =>
   models.sequelize.query(
     `SELECT intersectionId, count(intersectionId) total from fs_maintenance
@@ -173,24 +184,61 @@ const mostVisitedByYear = (models) => (year) =>
     selectType
   );
 
-const getTotalMaintenancesByType = (models) => async (
+const getRankingByType = (models) => async (
   { name: type, color },
   status = "Aprobada"
+) => {
+  const result = {
+    title: type,
+    color: [color],
+    indexes: []
+  };
+  console.log("result", result)
+
+  const queryResult = await models.sequelize.query(
+      `SELECT m.IntersectionID locationId, count(m.internalid) quantity
+      from fs_maintenance m
+      INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = m.internalid
+      INNER JOIN fs_activity a ON ma.activityId = a.InternalID
+      where m.status = '${status}'
+      and a.ActivityType = '${type}' 
+        and m.IntersectionID not in (8, 901, 902)
+        group by m.IntersectionID
+        order by quantity desc
+        limit 10;`,
+      selectType
+  );
+  if (queryResult.length) {
+    result.indexes = queryResult.map((r) => ({
+      id: r.locationId,
+      value: r.quantity
+    }));
+  }
+  return result;
+};
+
+const getTotalMaintenancesByType = (models) => async (
+  { name: type, color },
+  status = "Aprobada",
+  all
 ) => {
   const result = {
     id: type,
     color,
     data: null
   };
+  const withType = type => `AND a.ActivityType = '${type}'`
+
   const queryResult = await models.sequelize.query(
     `SELECT count(*) count, DATE_FORMAT(creationDate, "%Y-%m-01") date 
     FROM fs_maintenance m
     INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = m.internalid 
     INNER JOIN fs_activity a ON ma.activityId = a.InternalID 
     WHERE m.status = '${status}' 
-    AND a.ActivityType = '${type}' 
+    ${!all ? withType(type) : ""}
     AND m.IntersectionID not in (8, 901, 902)   
-    GROUP BY DATE_FORMAT(creationDate, "%Y-%m-01")`,
+    GROUP BY DATE_FORMAT(creationDate, "%Y-%m-01")
+    ORDER BY date ASC`,
     selectType
   );
   if (queryResult.length) {
@@ -234,7 +282,6 @@ const getMostVisitedData = async (models) => {
       year: 2020
     }
   ];
-  console.log("result", result);
   return result;
 };
 

@@ -4,13 +4,13 @@ module.exports = (models) => {
   router.get("/", async (req, res) => {
     try {
       let maintenances = await models.gs_maintenance_cost.findAll({
-        order: [["internalID", "ASC"]],
+        order: [["internalID", "ASC"]]
       });
       maintenances = maintenances.map((m) => {
         m = m.toJSON();
         return {
           ...m,
-          totalCosts: m.equipments + m.materials + m.services,
+          totalCosts: m.equipments + m.materials + m.services
         };
       });
 
@@ -64,7 +64,7 @@ module.exports = (models) => {
         totalEquipments,
         totalCorrective,
         totalPreventive,
-        totalEngineering,
+        totalEngineering
       });
     } catch (error) {
       console.log("error", error);

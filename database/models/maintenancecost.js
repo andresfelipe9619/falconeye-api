@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       preventive: DataTypes.DOUBLE,
       equipments: DataTypes.DOUBLE,
       materials: DataTypes.DOUBLE,
-      services: DataTypes.DOUBLE,
+      services: DataTypes.DOUBLE
     },
     {
       tableName: "gs_maintenance_cost"

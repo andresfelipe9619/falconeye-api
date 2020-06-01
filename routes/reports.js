@@ -29,7 +29,7 @@ const countStatus = (status, date) =>
   `SELECT COUNT(*) as conteo FROM fs_maintenance WHERE Status='${status}' AND ${date}`;
 
 const selectType = {
-  type: QueryTypes.SELECT,
+  type: QueryTypes.SELECT
 };
 const statuses = [
   "Aprobada",
@@ -38,15 +38,15 @@ const statuses = [
   "No Aprobada",
   "No Autorizada",
   "Espera de Ejecución",
-  "Pendiente de Aprobación",
+  "Pendiente de Aprobación"
 ];
 
 const activitiesTypes = [
   { name: "Correctivo", color: "#4caf50" },
   { name: "Preventivo", color: "#f44336" },
-  { name: "Ingenieria", color: "#3f51b5" },
+  { name: "Ingenieria", color: "#3f51b5" }
 ];
-//-----------------ECONOMIC REPORT------------------------
+// -----------------ECONOMIC REPORT------------------------
 const economicReport = (models) => async (req, res) => {
   try {
     const result = {};
@@ -67,7 +67,7 @@ const economicDetailReport = (models) => async (req, res) => {
   }
 };
 
-//-----------------TECHNICAL REPORT------------------------
+// -----------------TECHNICAL REPORT------------------------
 const technicalDetailReport = (models) => async (req, res) => {
   try {
     const pieData = await getPieData(models);
@@ -82,7 +82,7 @@ const technicalDetailReport = (models) => async (req, res) => {
 const geLineData = async (models) => {
   const action = getTotalMaintenancesByType(models);
   // const data = await action("Correctivo");
-  let data = await Promise.all(
+  const data = await Promise.all(
     activitiesTypes.map(({ name, color }) => action({ name, color }))
   );
   console.log("data", data);
@@ -102,34 +102,34 @@ const reduceToPieObject = (array) =>
   !Array.isArray(array)
     ? null
     : array.reduce((acc, item) => {
-        let obj = {};
-        if (
-          item.status.includes("Espera") ||
+      let obj = {};
+      if (
+        item.status.includes("Espera") ||
           item.status.includes("Pendiente")
-        ) {
-          obj = {
-            ...acc,
-            conlabelId: "con",
-            conName: item.status,
-            conCount: item.count,
-            pendingName: item.status,
-            pendingValue: item.count,
-          };
-        } else {
-          obj = {
-            ...acc,
-            prolabelId: "pro",
-            proCount: item.count,
-            proName: item.status,
-          };
-        }
-        obj.total = (acc.total || 0) + item.count;
-        if (obj.conCount && obj.proCount) {
-          obj.conPercentage = calcPercentage(obj.conCount, obj.total);
-          obj.proPercentage = calcPercentage(obj.proCount, obj.total);
-        }
-        return obj;
-      }, {});
+      ) {
+        obj = {
+          ...acc,
+          conlabelId: "con",
+          conName: item.status,
+          conCount: item.count,
+          pendingName: item.status,
+          pendingValue: item.count
+        };
+      } else {
+        obj = {
+          ...acc,
+          prolabelId: "pro",
+          proCount: item.count,
+          proName: item.status
+        };
+      }
+      obj.total = (acc.total || 0) + item.count;
+      if (obj.conCount && obj.proCount) {
+        obj.conPercentage = calcPercentage(obj.conCount, obj.total);
+        obj.proPercentage = calcPercentage(obj.proCount, obj.total);
+      }
+      return obj;
+    }, {});
 
 const calcPercentage = (x, count) => +((x * 100) / count).toFixed(2);
 
@@ -154,7 +154,7 @@ const technicalReport = (models) => async (req, res) => {
     const mostVisited = await getMostVisitedData(models);
     return res.json({
       mostVisited,
-      kpi: [visitsData, ...visitsStatusesData],
+      kpi: [visitsData, ...visitsStatusesData]
     });
   } catch (error) {
     console.log("Error", error);
@@ -177,26 +177,26 @@ const getTotalMaintenancesByType = (models) => async (
   { name: type, color },
   status = "Aprobada"
 ) => {
-  let result = {
+  const result = {
     id: type,
     color,
-    data: null,
+    data: null
   };
-  let queryResult = await models.sequelize.query(
-    `SELECT count(*) count, DATE_FORMAT(creationDate, "%Y-%m-01") date	
+  const queryResult = await models.sequelize.query(
+    `SELECT count(*) count, DATE_FORMAT(creationDate, "%Y-%m-01") date 
     FROM fs_maintenance m
-    INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = m.internalid	
-    INNER JOIN fs_activity a ON ma.activityId = a.InternalID	
-    WHERE m.status = '${status}'	
-    AND a.ActivityType = '${type}'
-    AND m.IntersectionID not in (8, 901, 902)   		
+    INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = m.internalid 
+    INNER JOIN fs_activity a ON ma.activityId = a.InternalID 
+    WHERE m.status = '${status}' 
+    AND a.ActivityType = '${type}' 
+    AND m.IntersectionID not in (8, 901, 902)   
     GROUP BY DATE_FORMAT(creationDate, "%Y-%m-01")`,
     selectType
   );
   if (queryResult.length) {
     result.data = queryResult.map((r) => ({
       y: r.count,
-      x: formatDate(r.date),
+      x: formatDate(r.date)
     }));
   }
   return result;
@@ -204,15 +204,15 @@ const getTotalMaintenancesByType = (models) => async (
 
 const getMostVisitedData = async (models) => {
   const action = mostVisitedByYear(models);
-  let [firstYear] = await action(2019);
-  let [secondYear] = await action(2020);
+  const [firstYear] = await action(2019);
+  const [secondYear] = await action(2020);
 
-  let [firstLocation = {}] = await models.sequelize.query(
+  const [firstLocation = {}] = await models.sequelize.query(
     `SELECT * FROM gs_maintenance_cost
      WHERE internalID = ${firstYear.intersectionId}`,
     selectType
   );
-  let [secondLocation = {}] = await models.sequelize.query(
+  const [secondLocation = {}] = await models.sequelize.query(
     `SELECT * FROM gs_maintenance_cost
      WHERE internalID = ${secondYear.intersectionId}`,
     selectType
@@ -224,15 +224,15 @@ const getMostVisitedData = async (models) => {
       location: firstLocation.mainStreet
         ? `${firstYear.intersectionId} - ${firstLocation.mainStreet}/${firstLocation.secondStreet}`
         : "",
-      year: 2019,
+      year: 2019
     },
     {
       ...secondYear,
       location: secondLocation.mainStreet
         ? `${secondYear.intersectionId} - ${secondLocation.mainStreet} / ${secondLocation.secondStreet}`
         : "",
-      year: 2020,
-    },
+      year: 2020
+    }
   ];
   console.log("result", result);
   return result;
@@ -240,22 +240,22 @@ const getMostVisitedData = async (models) => {
 
 const getVisitsStatusesData = (models) => async (statuses, totalVisits) => {
   let statusesData = statuses.map(async (status) => {
-    let [accResult] = await models.sequelize.query(
+    const [accResult] = await models.sequelize.query(
       countStatus(status, betweenOldDates),
       selectType
     );
-    let [currentResult] = await models.sequelize.query(
+    const [currentResult] = await models.sequelize.query(
       countStatus(status, betweenCurrentMonth),
       selectType
     );
-    let currentValue = currentResult.conteo;
-    let percentage = +((currentValue * 100) / totalVisits).toFixed(2);
+    const currentValue = currentResult.conteo;
+    const percentage = +((currentValue * 100) / totalVisits).toFixed(2);
     return {
       title: status,
       currentValue,
       percentage,
       accumulated: accResult.conteo,
-      currentDate: localDate,
+      currentDate: localDate
     };
   });
   statusesData = await Promise.all(statusesData);
@@ -278,8 +278,8 @@ const getVisitsData = async (models) => {
   const result = {
     title: "Visitas",
     accumulated: oldVisits.conteo,
-    currentDate: "Abril 2020",
-    currentValue: currentVisits.conteo,
+    currentDate: "Mayo 2020",
+    currentValue: currentVisits.conteo
   };
   return result;
 };

@@ -16,17 +16,40 @@ const capitalize = (s) => {
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 
+const formatToUnits = (number, decimals = 2) => {
+  let totalStr = "";
+  const numStr = String(Number(number).toFixed(decimals));
+  const parts = numStr.split(".");
+  const numLen = parts[0].length;
+  for (let i = 0; i < numLen; i++) {
+    const y = numLen - i;
+    if (i > 0 && y % 3 === 0) {
+      totalStr += y >= 6 ? "'" : ",";
+    }
+    totalStr += parts[0].charAt(i);
+  }
+  const decimalPart = decimals ? `.${parts[1] || ""}` : "";
+  return `$${totalStr}${decimalPart}`;
+};
+
 const formatDate = (date) =>
   capitalize(DateTime.fromISO(date).setLocale("es").toFormat("LLL yy"));
 
 const localDate = capitalize(
   DateTime.local().setLocale("es").toFormat("MMMM yyyy")
 );
-const betweenOldDates = "CreationDate BETWEEN '2019-01-01' AND '2020-04-30'";
+const betweenOldDates = "CreationDate BETWEEN '2019-01-01' AND '2020-05-30'";
 const betweenCurrentMonth =
-  "CreationDate BETWEEN '2020-05-01' AND '2020-05-30'";
+  "MONTH(CreationDate) = MONTH(CURRENT_DATE()) AND YEAR(CreationDate) = YEAR(CURRENT_DATE())";
+
 const countStatus = (status, date) =>
   `SELECT COUNT(*) as conteo FROM fs_maintenance WHERE Status='${status}' AND ${date}`;
+const selectEconomicalSum = () =>
+`SELECT SUM( IFNULL(a.price*ma.quantity , 0.00) ) valor FROM fs_maintenance 
+INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = internalid 
+INNER JOIN fs_activity a ON ma.activityId = a.InternalID`
+const sumEconomicStatus = (status, date) =>
+  `${selectEconomicalSum()} WHERE a.ActivityType ='${status}' ${date ? "AND " : ""} ${date || ""}`;
 
 const selectType = {
   type: QueryTypes.SELECT
@@ -42,15 +65,26 @@ const statuses = [
 ];
 
 const activitiesTypes = [
-  { name: "Correctivo", color: "#66bb6a" },
+  { name: "Ingenieria", color: "#42a5f5" },
   { name: "Preventivo", color: "#ef5350" },
-  { name: "Ingenieria", color: "#42a5f5" }
+  { name: "Correctivo", color: "#66bb6a" }
 ];
 // -----------------ECONOMIC REPORT------------------------
 const economicReport = (models) => async (req, res) => {
   try {
-    const result = {};
-    return res.json(result);
+    const visitsData = await getEconomicVisitsData(models);
+    console.log("visitsData", visitsData)
+    const visitsStatusesData = await getEconomicVisitsStatusesData(models)(
+      [...activitiesTypes.map(({ name }) => name), "Centro de control"],
+      visitsData.currentValue
+    );
+    // const mostExpensive = await getMostExpensiveData(models);
+    const lineData = await geEconomicLineData(models);
+    return res.json({
+      // mostExpensive,
+      lineData,
+      kpi: visitsStatusesData
+    });
   } catch (error) {
     console.log("Error", error);
     return res.status(500).send(error);
@@ -67,12 +101,134 @@ const economicDetailReport = (models) => async (req, res) => {
   }
 };
 
+const getEconomicVisitsData = async (models) => {
+  const [oldVisits] = await models.sequelize.query(
+    `${selectEconomicalSum()} WHERE ${betweenOldDates}`,
+    selectType
+  );
+  const [currentVisits] = await models.sequelize.query(
+    `${selectEconomicalSum()} WHERE ${betweenCurrentMonth}`,
+    selectType
+  );
+  const result = {
+    title: "Visitas",
+    accumulated: oldVisits.valor || 0,
+    currentDate: localDate,
+    currentValue: currentVisits.valor || 0
+  };
+  return result;
+};
+
+const getEconomicVisitsStatusesData = (models) => async (statuses, totalMoney) => {
+  let statusesData = statuses.map(async (status) => {
+    const [accResult] = await models.sequelize.query(
+      sumEconomicStatus(status, betweenOldDates),
+      selectType
+    );
+    const [currentResult] = await models.sequelize.query(
+      sumEconomicStatus(status, betweenCurrentMonth),
+      selectType
+    );
+    const currentValue = currentResult.valor || 0;
+    const percentage = +((currentValue * 100) / totalMoney).toFixed(2);
+    return {
+      title: status,
+      currentValue,
+      percentage: percentage || 0,
+      accumulated: accResult.valor || 0,
+      currentDate: localDate
+    };
+  });
+  statusesData = await Promise.all(statusesData);
+  return statusesData;
+};
+
+const getMostExpensiveData = async (models) => {
+  const action = mostExpensiveByStatus(models);
+  let statusesData = statuses.map(async status => {
+    const [statusData] = await action(status);
+    const [location] = await models.sequelize.query(
+        `SELECT * FROM gs_maintenance_cost
+         WHERE internalID = ${statusData.intersectionId}`,
+        selectType
+    );
+    return {
+      ...statusData,
+      location: location.mainStreet
+        ? `${statusData.intersectionId} - ${location.mainStreet}/${location.secondStreet}`
+        : ""
+    }
+  }
+  )
+  statusesData = await Promise.all(statusesData);
+
+  return statusesData;
+};
+
+const geEconomicLineData = async (models) => {
+  const action = getEconomicTotalMaintenancesByType(models);
+  const data = await Promise.all(
+    activitiesTypes.map(({ name, color }) => action({ name, color }))
+  );
+  const total = await action(
+    { name: "Total", color: "#ffee58" },
+    "Aprobada",
+    true
+  );
+  return [total, ...data];
+};
+
+const mostExpensiveByStatus = (models) => (status) =>
+  models.sequelize.query(
+    `${sumEconomicStatus(status)}
+  AND intersectionId not in (8, 901, 902)   
+  GROUP BY intersectionId 
+  ORDER BY valor desc
+  LIMIT 1`,
+    selectType
+  );
+const getEconomicTotalMaintenancesByType = (models) => async (
+  { name: type, color },
+  status = "Aprobada",
+  all
+) => {
+  const result = {
+    id: type,
+    color,
+    data: null
+  };
+  const withType = (type) => `AND a.ActivityType = '${type}'`;
+
+  const queryResult = await models.sequelize.query(
+      `SELECT SUM( IFNULL(a.price*ma.quantity , 0.00) ) valor, DATE_FORMAT(creationDate, "%Y-%m-01") date 
+      FROM fs_maintenance m
+      INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = m.internalid 
+      INNER JOIN fs_activity a ON ma.activityId = a.InternalID
+      WHERE m.status = '${status}' 
+      ${!all ? withType(type) : ""}
+      AND m.IntersectionID not in (8, 901, 902)
+      AND m.creationDate <= NOW() and m.creationDate >= Date_add(Now(),interval - 12 month)
+      GROUP BY DATE_FORMAT(m.creationDate, "%Y-%m-01")
+      ORDER BY date ASC
+      LIMIT 12
+      `,
+      selectType
+  );
+  if (queryResult.length) {
+    result.data = queryResult.map((r) => ({
+      y: +r.valor.toFixed(2),
+      x: formatDate(r.date)
+    }));
+  }
+  return result;
+};
+
 // -----------------TECHNICAL REPORT------------------------
 const technicalDetailReport = (models) => async (req, res) => {
   try {
     const pieData = await getPieData(models);
     const lineData = await geLineData(models);
-    const rankingData = await getTechnicalRankingData(models)
+    const rankingData = await getTechnicalRankingData(models);
 
     return res.json({ pieData, lineData, rankingData });
   } catch (error) {
@@ -106,8 +262,12 @@ const geLineData = async (models) => {
   const data = await Promise.all(
     activitiesTypes.map(({ name, color }) => action({ name, color }))
   );
-  const total = await action({ name: "Total", color: "#ffee58" }, "Aprobada", true)
-  return [...data, total];
+  const total = await action(
+    { name: "Total", color: "#ffee58" },
+    "Aprobada",
+    true
+  );
+  return [total, ...data];
 };
 
 const getPieData = async (models) => {
@@ -119,13 +279,13 @@ const getPieData = async (models) => {
   return data;
 };
 
-const getTechnicalRankingData = async models => {
+const getTechnicalRankingData = async (models) => {
   const action = getRankingByType(models);
   const data = await Promise.all(
     activitiesTypes.map(({ name }) => action({ name, color: "#5c6bc0" }))
   );
   return data;
-}
+};
 
 const reduceToPieObject = (array) =>
   !Array.isArray(array)
@@ -164,11 +324,11 @@ const calcPercentage = (x, count) => +((x * 100) / count).toFixed(2);
 
 const queryByCoAttributes = (models) => (first, second) =>
   models.sequelize.query(
-    `SELECT m.status, count(m.status) count from fs_maintenance as m 
-  WHERE m.status in (
-  SELECT ca.value from co_attributes ca where ca.attribute_name in ('${first}', '${second}')
-  )
-  GROUP BY m.status
+    `Select ca.value status,  count( m.id ) count
+    from co_attributes ca
+    LEFT OUTER JOIN fs_maintenance m ON m.status = ca.value
+    where ca.attribute_name in  ('${first}', '${second}')
+    group by ca.value
   `,
     selectType
   );
@@ -193,10 +353,10 @@ const getRankingByType = (models) => async (
     color: [color],
     indexes: []
   };
-  console.log("result", result)
+  console.log("result", result);
 
   const queryResult = await models.sequelize.query(
-      `SELECT m.IntersectionID locationId, count(m.internalid) quantity
+    `SELECT m.IntersectionID locationId, count(m.internalid) quantity
       from fs_maintenance m
       INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = m.internalid
       INNER JOIN fs_activity a ON ma.activityId = a.InternalID
@@ -206,11 +366,11 @@ const getRankingByType = (models) => async (
         group by m.IntersectionID
         order by quantity desc
         limit 10;`,
-      selectType
+    selectType
   );
   if (queryResult.length) {
     result.indexes = queryResult.map((r) => ({
-      id: r.locationId,
+      id: String(r.locationId),
       value: r.quantity
     }));
   }
@@ -227,7 +387,7 @@ const getTotalMaintenancesByType = (models) => async (
     color,
     data: null
   };
-  const withType = type => `AND a.ActivityType = '${type}'`
+  const withType = (type) => `AND a.ActivityType = '${type}'`;
 
   const queryResult = await models.sequelize.query(
     `SELECT count(*) count, DATE_FORMAT(creationDate, "%Y-%m-01") date 
@@ -236,9 +396,12 @@ const getTotalMaintenancesByType = (models) => async (
     INNER JOIN fs_activity a ON ma.activityId = a.InternalID 
     WHERE m.status = '${status}' 
     ${!all ? withType(type) : ""}
-    AND m.IntersectionID not in (8, 901, 902)   
+    AND m.IntersectionID not in (8, 901, 902)
+    AND creationDate <= NOW() and creationDate >= Date_add(Now(),interval - 12 month)
     GROUP BY DATE_FORMAT(creationDate, "%Y-%m-01")
-    ORDER BY date ASC`,
+    ORDER BY date ASC
+    LIMIT 12
+    `,
     selectType
   );
   if (queryResult.length) {
@@ -295,13 +458,13 @@ const getVisitsStatusesData = (models) => async (statuses, totalVisits) => {
       countStatus(status, betweenCurrentMonth),
       selectType
     );
-    const currentValue = currentResult.conteo;
+    const currentValue = currentResult.conteo || 0;
     const percentage = +((currentValue * 100) / totalVisits).toFixed(2);
     return {
       title: status,
       currentValue,
-      percentage,
-      accumulated: accResult.conteo,
+      percentage: percentage || 0,
+      accumulated: accResult.conteo || 0,
       currentDate: localDate
     };
   });
@@ -325,7 +488,7 @@ const getVisitsData = async (models) => {
   const result = {
     title: "Visitas",
     accumulated: oldVisits.conteo,
-    currentDate: "Mayo 2020",
+    currentDate: localDate,
     currentValue: currentVisits.conteo
   };
   return result;

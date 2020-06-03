@@ -187,6 +187,8 @@ const mostExpensiveByStatus = (models) => (status) =>
   LIMIT 1`,
     selectType
   );
+const withType = (type) => `AND a.ActivityType = '${type}'`;
+
 const getEconomicTotalMaintenancesByType = (models) => async (
   { name: type, color },
   status = "Aprobada",
@@ -197,28 +199,24 @@ const getEconomicTotalMaintenancesByType = (models) => async (
     color,
     data: null
   };
-  const withType = (type) => `AND a.ActivityType = '${type}'`;
 
   const queryResult = await models.sequelize.query(
-      `SELECT SUM( IFNULL(a.price*ma.quantity , 0.00) ) valor, DATE_FORMAT(creationDate, "%Y-%m-01") date 
+      `SELECT SUM( IFNULL(a.price*ma.quantity , 0.00) ) count, DATE_FORMAT(m.startdate, "%Y-%m-01") date 
       FROM fs_maintenance m
       INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = m.internalid 
       INNER JOIN fs_activity a ON ma.activityId = a.InternalID
       WHERE m.status = '${status}' 
-      ${!all ? withType(type) : ""}
-      AND m.IntersectionID not in (8, 901, 902)
-      AND m.creationDate <= NOW() and m.creationDate >= Date_add(Now(),interval - 12 month)
-      GROUP BY DATE_FORMAT(m.creationDate, "%Y-%m-01")
+      ${!all ? withType(type) : "AND a.ActivityType NOT IN('Centro de Control')"}
+      AND m.IntersectionID NOT IN (8, 901, 902)
+      AND m.startdate <= NOW() and m.startdate >= Date_add(Now(),interval - 12 month)
+      GROUP BY DATE_FORMAT(m.startdate, "%Y-%m-01")
       ORDER BY date ASC
-      LIMIT 12
+      LIMIT 12;
       `,
       selectType
   );
   if (queryResult.length) {
-    result.data = queryResult.map((r) => ({
-      y: +r.valor.toFixed(2),
-      x: formatDate(r.date)
-    }));
+    result.data = queryResultToLineData(queryResult)
   }
   return result;
 };
@@ -387,31 +385,52 @@ const getTotalMaintenancesByType = (models) => async (
     color,
     data: null
   };
-  const withType = (type) => `AND a.ActivityType = '${type}'`;
 
   const queryResult = await models.sequelize.query(
-    `SELECT count(*) count, DATE_FORMAT(creationDate, "%Y-%m-01") date 
+    `
+    SELECT COUNT(*) count, DATE_FORMAT(m.startdate, "%Y-%m-01") date 
     FROM fs_maintenance m
     INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = m.internalid 
     INNER JOIN fs_activity a ON ma.activityId = a.InternalID 
     WHERE m.status = '${status}' 
-    ${!all ? withType(type) : ""}
-    AND m.IntersectionID not in (8, 901, 902)
-    AND creationDate <= NOW() and creationDate >= Date_add(Now(),interval - 12 month)
-    GROUP BY DATE_FORMAT(creationDate, "%Y-%m-01")
+    ${!all ? withType(type) : "AND a.ActivityType NOT IN('Centro de Control')"}
+    AND m.IntersectionID NOT IN (8, 901, 902)
+    AND m.startdate <= NOW() and m.startdate >= Date_add(Now(),interval - 12 month)
+    GROUP BY DATE_FORMAT(m.startdate, "%Y-%m-01")
     ORDER BY date ASC
-    LIMIT 12
+    LIMIT 12;
     `,
     selectType
   );
+
   if (queryResult.length) {
-    result.data = queryResult.map((r) => ({
-      y: r.count,
-      x: formatDate(r.date)
-    }));
+    result.data = queryResultToLineData(queryResult)
   }
   return result;
 };
+
+const queryResultToLineData = (queryResult) => {
+  const last12Months = getLast12Months()
+  const last12MonthsData = last12Months.map(prevMonth => {
+    const found = queryResult.find(({ date }) => date === prevMonth)
+    if (found) { return { ...found, count: +found.count.toFixed(2) } }
+    return { count: 0, date: prevMonth }
+  }).reverse()
+  const data = last12MonthsData.map((r) => ({
+    y: r.count,
+    x: formatDate(r.date)
+  }));
+  return data;
+}
+
+const getLast12Months = () => {
+  const monthsNumbers = Array.from(Array(12), (_, i) => i + 1)
+  const last12Months = monthsNumbers.map(number => {
+    const dt = DateTime.local().set({ day: 1 }).minus({ months: number }).toISODate();
+    return dt
+  })
+  return last12Months;
+}
 
 const getMostVisitedData = async (models) => {
   const action = mostVisitedByYear(models);

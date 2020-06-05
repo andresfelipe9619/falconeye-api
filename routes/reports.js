@@ -45,7 +45,7 @@ const betweenCurrentMonth =
 const countStatus = (status, date) =>
   `SELECT COUNT(*) as conteo FROM fs_maintenance WHERE Status='${status}' AND ${date}`;
 const selectEconomicalSum = () =>
-`SELECT SUM( IFNULL(a.price*ma.quantity , 0.00) ) valor FROM fs_maintenance 
+  `SELECT SUM( IFNULL(a.price*ma.quantity , 0.00) ) valor FROM fs_maintenance 
 INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = internalid 
 INNER JOIN fs_activity a ON ma.activityId = a.InternalID`
 const sumEconomicStatus = (status, date) =>
@@ -93,8 +93,9 @@ const economicReport = (models) => async (req, res) => {
 
 const economicDetailReport = (models) => async (req, res) => {
   try {
-    const result = {};
-    return res.json(result);
+    const pieData = await getEconomicPieData(models);
+    const rankingData = await getEconomicRankingData(models);
+    return res.json({ pieData, rankingData });
   } catch (error) {
     console.log("Error", error);
     return res.status(500).send(error);
@@ -148,9 +149,9 @@ const getMostExpensiveData = async (models) => {
   let statusesData = statuses.map(async status => {
     const [statusData] = await action(status);
     const [location] = await models.sequelize.query(
-        `SELECT * FROM gs_maintenance_cost
+      `SELECT * FROM gs_maintenance_cost
          WHERE internalID = ${statusData.intersectionId}`,
-        selectType
+      selectType
     );
     return {
       ...statusData,
@@ -201,7 +202,7 @@ const getEconomicTotalMaintenancesByType = (models) => async (
   };
 
   const queryResult = await models.sequelize.query(
-      `SELECT SUM( IFNULL(a.price*ma.quantity , 0.00) ) count, DATE_FORMAT(m.startdate, "%Y-%m-01") date 
+    `SELECT SUM( IFNULL(a.price*ma.quantity , 0.00) ) count, DATE_FORMAT(m.startdate, "%Y-%m-01") date 
       FROM fs_maintenance m
       INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = m.internalid 
       INNER JOIN fs_activity a ON ma.activityId = a.InternalID
@@ -213,10 +214,75 @@ const getEconomicTotalMaintenancesByType = (models) => async (
       ORDER BY date ASC
       LIMIT 12;
       `,
-      selectType
+    selectType
   );
   if (queryResult.length) {
     result.data = queryResultToLineData(queryResult)
+  }
+  return result;
+};
+
+const getEconomicPieData = async (models) => {
+  const action = queryByBudget(models);
+  const first = await action("DB_TECH_ST1_GR1", "DB_TECH_ST2_GR1");
+  const second = await action("DB_TECH_ST1_GR2", "DB_TECH_ST2_GR2");
+  const third = await action("DB_TECH_ST1_GR3", "DB_TECH_ST2_GR3");
+  const forth = await action("DB_TECH_ST1_GR3", "DB_TECH_ST2_GR3");
+  const data = [first, second, third, forth].map(reduceToPieObject);
+  return data;
+};
+
+const queryByBudget = (models) => (budget, executed) =>
+  models.sequelize.query(
+    `SELECT 'Ejecutado' Total, SUM( IFNULL(a.price*ma.quantity , 0.00) )  valor
+    FROM  fs_maintenance m
+    INNER JOIN  fs_maintenance_activities ma ON ma.maintenanceId = m.internalid
+    INNER JOIN  fs_activity a ON ma.activityId = a.InternalID
+    WHERE m.status = 'Aprobada'
+    UNION
+    SELECT 'Presupuesto' Total, SUM( IFNULL(a.price*pa.quantity , 0.00) ) valor
+    FROM  fs_project_activities pa
+    INNER JOIN  fs_activity a ON pa.activityId = a.InternalID`,
+    selectType
+  );
+
+const getEconomicRankingData = async (models) => {
+  const action = getEconomicRankingByType(models);
+  const data = await Promise.all(
+    activitiesTypes.map(({ name, color }) => action({ name, color }))
+  );
+  return data;
+};
+
+const getEconomicRankingByType = (models) => async (
+  { name: type, color },
+  status = "Aprobada"
+) => {
+  const result = {
+    title: type,
+    color: [color],
+    indexes: []
+  };
+  console.log("result", result);
+
+  const queryResult = await models.sequelize.query(
+    `SELECT m.IntersectionID locationId, SUM( IFNULL(a.price*ma.quantity , 0.00) ) valor
+      FROM fs_maintenance m
+      INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = m.internalid
+      INNER JOIN fs_activity a ON ma.activityId = a.InternalID
+      WHERE m.status = '${status}'
+      AND a.ActivityType = '${type}' 
+      AND m.IntersectionID NOT IN (8, 901, 902)
+      GROUP BY m.IntersectionID
+      ORDER BY valor desc
+      LIMIT 10`,
+    selectType
+  );
+  if (queryResult.length) {
+    result.indexes = queryResult.map((r) => ({
+      id: String(r.locationId),
+      value: +r.valor.toFixed(2)
+    }));
   }
   return result;
 };
@@ -294,7 +360,7 @@ const reduceToPieObject = (array) =>
       if (!item.label) return obj
       if (
         item.label.includes("Espera") ||
-          item.label.includes("Pendiente")
+        item.label.includes("Pendiente")
       ) {
         obj = {
           ...acc,

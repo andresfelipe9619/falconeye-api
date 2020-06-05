@@ -224,7 +224,7 @@ const getEconomicTotalMaintenancesByType = (models) => async (
 // -----------------TECHNICAL REPORT------------------------
 const technicalDetailReport = (models) => async (req, res) => {
   try {
-    const pieData = await getPieData(models);
+    const pieData = await getTechnicalPieData(models);
     const lineData = await geLineData(models);
     const rankingData = await getTechnicalRankingData(models);
 
@@ -268,7 +268,7 @@ const geLineData = async (models) => {
   return [total, ...data];
 };
 
-const getPieData = async (models) => {
+const getTechnicalPieData = async (models) => {
   const action = queryByCoAttributes(models);
   const first = await action("DB_TECH_ST1_GR1", "DB_TECH_ST2_GR1");
   const second = await action("DB_TECH_ST1_GR2", "DB_TECH_ST2_GR2");
@@ -280,7 +280,7 @@ const getPieData = async (models) => {
 const getTechnicalRankingData = async (models) => {
   const action = getRankingByType(models);
   const data = await Promise.all(
-    activitiesTypes.map(({ name }) => action({ name, color: "#5c6bc0" }))
+    activitiesTypes.map(({ name, color }) => action({ name, color }))
   );
   return data;
 };
@@ -288,18 +288,20 @@ const getTechnicalRankingData = async (models) => {
 const reduceToPieObject = (array) =>
   !Array.isArray(array)
     ? null
-    : array.reduce((acc, item) => {
+    : array.reduce((acc, item, index) => {
+      console.log("item", item)
       let obj = {};
+      if (!item.label) return obj
       if (
-        item.status.includes("Espera") ||
-          item.status.includes("Pendiente")
+        item.label.includes("Espera") ||
+          item.label.includes("Pendiente")
       ) {
         obj = {
           ...acc,
           conlabelId: "con",
-          conName: item.status,
+          conName: item.label,
           conCount: item.count,
-          pendingName: item.status,
+          pendingName: item.label,
           pendingValue: item.count
         };
       } else {
@@ -307,13 +309,17 @@ const reduceToPieObject = (array) =>
           ...acc,
           prolabelId: "pro",
           proCount: item.count,
-          proName: item.status
+          proName: item.label
         };
       }
       obj.total = (acc.total || 0) + item.count;
       if (obj.conCount && obj.proCount) {
         obj.conPercentage = calcPercentage(obj.conCount, obj.total);
         obj.proPercentage = calcPercentage(obj.proCount, obj.total);
+      } else if (obj.conCount === 0 && obj.proCount === 0 && index > 0) {
+        obj.proCount = 1;
+        obj.conPercentage = 0;
+        obj.proPercentage = 100;
       }
       return obj;
     }, {});
@@ -322,12 +328,11 @@ const calcPercentage = (x, count) => +((x * 100) / count).toFixed(2);
 
 const queryByCoAttributes = (models) => (first, second) =>
   models.sequelize.query(
-    `Select ca.value status,  count( m.id ) count
+    `Select ca.value status, ca.Description label, count( m.id ) count
     from co_attributes ca
     LEFT OUTER JOIN fs_maintenance m ON m.status = ca.value
     where ca.attribute_name in  ('${first}', '${second}')
-    group by ca.value
-  `,
+    group by ca.value, ca.Description`,
     selectType
   );
 

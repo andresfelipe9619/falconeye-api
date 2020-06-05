@@ -359,8 +359,8 @@ const reduceToPieObject = (array) =>
       let obj = {};
       if (!item.label) return obj
       if (
-        item.label.includes("Espera") ||
-        item.label.includes("Pendiente")
+        item.status.includes("Espera") ||
+        item.status.includes("Pendiente")
       ) {
         obj = {
           ...acc,

@@ -18,7 +18,9 @@ const activitiesTypes = [
   { name: "Correctivo", color: "#66bb6a" }
 ];
 
-const totalActivity = { name: "Total", color: "#42a5f5" };
+const totalActivityType = { name: "Total", color: "#42a5f5" };
+
+const activitiesTypesNames = [...activitiesTypes, totalActivityType].map(({ name }) => name);
 
 const selectType = {
   type: QueryTypes.SELECT
@@ -29,7 +31,8 @@ const capitalize = (s) => {
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 
-const withType = (type, and = true) => `${and ? "AND" : "WHERE"} a.ActivityType = '${type}'`;
+const withType = (type, and = true) =>
+  `${and ? "AND" : "WHERE"} a.ActivityType = '${type}'`;
 
 const formatToUnits = (number, decimals = 2) => {
   let totalStr = "";
@@ -54,38 +57,65 @@ const localDate = capitalize(
   DateTime.local().setLocale("es").toFormat("MMMM yyyy")
 );
 
-const betweenOldDates = "CreationDate BETWEEN '2019-01-01' AND '2020-05-30'";
+const betweenOldDates = `MONTH(startdate) < MONTH(CURRENT_DATE()) 
+AND YEAR(startdate) <= YEAR(CURRENT_DATE())`;
 
-const betweenCurrentMonth = `MONTH(CreationDate) = MONTH(CURRENT_DATE()) 
-  AND YEAR(CreationDate) = YEAR(CURRENT_DATE())`;
+const betweenCurrentMonth = `MONTH(startdate) = MONTH(CURRENT_DATE()) 
+  AND YEAR(startdate) = YEAR(CURRENT_DATE())`;
 
 const queryResultToLineData = (queryResult) => {
-  const last12Months = getLast12Months()
-  const last12MonthsData = last12Months.map(prevMonth => {
-    const found = queryResult.find(({ date }) => date === prevMonth)
-    if (found) { return { ...found, count: +found.count.toFixed(2) } }
-    return { count: 0, date: prevMonth }
-  }).reverse()
+  const last12MonthsData = completeMissingMonths(queryResult)
   const data = last12MonthsData.map((r) => ({
     y: r.count,
     x: formatDate(r.date)
   }));
   return data;
+};
+
+const queryResultToBarData = (queryResult) => {
+  const last12MonthsData = completeMissingMonths(queryResult)
+  const data = last12MonthsData.map((r) => ({
+    value: r.count,
+    date: formatDate(r.date)
+  }));
+  return data;
+};
+
+const getAverage = values => {
+  const count = values.length;
+  values = values.reduce((acc, current) => acc + current);
+  values /= count;
+  return +values.toFixed(2);
+}
+
+const completeMissingMonths = (queryResult) => {
+  const last12Months = getLast12Months();
+  const last12MonthsData = last12Months
+    .map((prevMonth) => {
+      const found = queryResult.find(({ date }) => date === prevMonth);
+      if (found) {
+        return { ...found, count: +found.count.toFixed(2) };
+      }
+      return { count: 0, date: prevMonth };
+    })
+    .reverse();
+  return last12MonthsData
 }
 
 const calcPercentage = (x, count) => +((x * 100) / count).toFixed(2);
 
 const reduceToPieObject = (array) => {
-  if (!Array.isArray(array)) { return null; }
+  if (!Array.isArray(array)) {
+    return null;
+  }
   return array.reduce((acc, item, index) => {
-    console.log("item", item)
     let obj = {};
-    if (!item.label && !item.status) return obj
-    if (
+    if (!item.label && !item.status) return obj;
+    const isStatusRed =
       item.status.includes("Espera") ||
-      item.status === "Ejecutado" ||
-        item.status.includes("Pendiente")
-    ) {
+      activitiesTypesNames.includes(item.status) ||
+      item.status.includes("Pendiente");
+    if (isStatusRed) {
       obj = {
         ...acc,
         conlabelId: "con",
@@ -113,16 +143,19 @@ const reduceToPieObject = (array) => {
     }
     return obj;
   }, {});
-}
+};
 
 const getLast12Months = () => {
-  const monthsNumbers = Array.from(Array(12), (_, i) => i + 1)
-  const last12Months = monthsNumbers.map(number => {
-    const dt = DateTime.local().set({ day: 1 }).minus({ months: number }).toISODate();
-    return dt
-  })
+  const monthsNumbers = Array.from(Array(12), (_, i) => i + 1);
+  const last12Months = monthsNumbers.map((number) => {
+    const dt = DateTime.local()
+      .set({ day: 1 })
+      .minus({ months: number })
+      .toISODate();
+    return dt;
+  });
   return last12Months;
-}
+};
 
 module.exports = {
   withType,
@@ -130,13 +163,15 @@ module.exports = {
   localDate,
   capitalize,
   selectType,
+  getAverage,
   formatDate,
   formatToUnits,
-  totalActivity,
+  totalActivityType,
   calcPercentage,
   activitiesTypes,
   betweenOldDates,
   reduceToPieObject,
   betweenCurrentMonth,
+  queryResultToBarData,
   queryResultToLineData
-}
+};

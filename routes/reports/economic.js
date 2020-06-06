@@ -3,11 +3,13 @@ const {
   withType,
   localDate,
   selectType,
-  totalActivity,
+  getAverage,
+  totalActivityType,
   activitiesTypes,
   betweenOldDates,
   reduceToPieObject,
   betweenCurrentMonth,
+  queryResultToBarData,
   queryResultToLineData
 } = require("../utils")
 
@@ -36,7 +38,8 @@ const economicDetailReport = (models) => async (req, res) => {
   try {
     const pieData = await getEconomicPieData(models);
     const rankingData = await getEconomicRankingData(models);
-    return res.json({ pieData, rankingData });
+    const barData = await getEconomicBarData(models);
+    return res.json({ pieData, barData, rankingData });
   } catch (error) {
     console.log("Error", error);
     return res.status(500).send(error);
@@ -115,13 +118,21 @@ const getMostExpensiveData = async (models) => {
   return statusesData;
 };
 
+const getEconomicBarData = async models => {
+  const action = getEconomicBarDataByType(models);
+  const data = await Promise.all(
+    activitiesTypes.map(({ name, color }) => action({ name, color }))
+  );
+  return data
+}
+
 const geEconomicLineData = async (models) => {
   const action = getEconomicTotalMaintenancesByType(models);
   const data = await Promise.all(
     activitiesTypes.map(({ name, color }) => action({ name, color }))
   );
   const total = await action(
-    totalActivity,
+    totalActivityType,
     "Aprobada",
     true
   );
@@ -137,6 +148,41 @@ const mostExpensiveByStatus = (models) => (status) =>
     LIMIT 1`,
       selectType
   );
+
+const getEconomicBarDataByType = (models) => async (
+  { name: type, color },
+  status = "Aprobada",
+  all
+) => {
+  const result = {
+    id: type,
+    color,
+    data: null,
+    media: 0
+  };
+
+  const queryResult = await models.sequelize.query(
+      `
+        SELECT DATE_FORMAT(m.startdate, "%Y-%m-01") date, SUM( IFNULL(a.price*ma.quantity , 0.00) )  count
+        FROM fs_maintenance m
+        INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = m.internalid
+        INNER JOIN fs_activity a ON ma.activityId = a.InternalID
+        WHERE m.status = '${status}' 
+        AND m.IntersectionID NOT IN (8, 901, 902)
+        ${!all ? withType(type) : "AND a.ActivityType NOT IN('Centro de Control')"}
+        GROUP BY date
+        ORDER BY date ASC
+        LIMIT 12
+        `,
+      selectType
+  );
+  if (queryResult.length) {
+    const barData = queryResultToBarData(queryResult)
+    result.data = barData;
+    result.media = getAverage(barData.map(({ value }) => value))
+  }
+  return result;
+};
 
 const getEconomicTotalMaintenancesByType = (models) => async (
   { name: type, color },
@@ -172,12 +218,13 @@ const getEconomicTotalMaintenancesByType = (models) => async (
 
 const getEconomicPieData = async (models) => {
   const action = queryByBudget(models);
-  const promises = activitiesTypes.map(async ({ name }) => {
-    const activityResult = await action(name);
-    console.log("activityResult", activityResult)
+  const promises = [totalActivityType, ...activitiesTypes].map(async ({ name }) => {
+    const isAll = name => name === "Total"
+    const all = isAll(name)
+    const activityResult = await action(name, all);
     if (!activityResult) return null;
-    return activityResult.map(({ name, count }) =>
-      ({ status: name, label: name, count })
+    return activityResult.map(({ name: activityName, count }) =>
+      ({ status: activityName, label: isAll(activityName) ? "Presupuesto" : activityName, count: +count.toFixed(2) })
     )
   })
   const activityData = await Promise.all(promises);
@@ -187,14 +234,14 @@ const getEconomicPieData = async (models) => {
 
 const queryByBudget = (models) => (activity, all) =>
   models.sequelize.query(
-      `SELECT 'ejecutado' name, SUM( IFNULL(a.price*ma.quantity , 0.00) )  count
+      `SELECT 'Ejecutado' name, SUM( IFNULL(a.price*ma.quantity , 0.00) )  count
       FROM  fs_maintenance m
       INNER JOIN  fs_maintenance_activities ma ON ma.maintenanceId = m.internalid
       INNER JOIN  fs_activity a ON ma.activityId = a.InternalID
       WHERE m.status = 'Aprobada'
       ${!all ? withType(activity) : "AND a.ActivityType NOT IN('Centro de Control')"}
       UNION
-      SELECT '${activity || "presupuesto"}' label, SUM( IFNULL(a.price*pa.quantity , 0.00) ) count
+      SELECT '${activity}' name, SUM( IFNULL(a.price*pa.quantity , 0.00) ) count
       FROM  fs_project_activities pa
       INNER JOIN  fs_activity a ON pa.activityId = a.InternalID
       ${!all ? withType(activity, false) : ""}
@@ -219,7 +266,6 @@ const getEconomicRankingByType = (models) => async (
     color: [color],
     indexes: []
   };
-  console.log("result", result);
 
   const queryResult = await models.sequelize.query(
       `SELECT m.IntersectionID locationId, SUM( IFNULL(a.price*ma.quantity , 0.00) ) valor

@@ -5,6 +5,7 @@ const {
   selectType,
   activitiesTypes,
   betweenOldDates,
+  totalActivityType,
   reduceToPieObject,
   betweenCurrentMonth,
   queryResultToLineData
@@ -49,7 +50,7 @@ const geLineData = async (models) => {
     activitiesTypes.map(({ name, color }) => action({ name, color }))
   );
   const total = await action(
-    { name: "Total", color: "#ffee58" },
+    totalActivityType,
     "Aprobada",
     true
   );
@@ -68,7 +69,7 @@ const getTechnicalPieData = async (models) => {
 const getTechnicalRankingData = async (models) => {
   const action = getRankingByType(models);
   const data = await Promise.all(
-    activitiesTypes.map(({ name, color }) => action({ name, color }))
+    activitiesTypes.reverse().map(({ name, color }) => action({ name, color }))
   );
   return data;
 };

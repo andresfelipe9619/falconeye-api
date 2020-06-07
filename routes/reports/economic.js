@@ -1,5 +1,4 @@
 const {
-  statuses,
   withType,
   localDate,
   selectType,
@@ -21,10 +20,10 @@ const economicReport = (models) => async (req, res) => {
       [...activitiesTypes.map(({ name }) => name), "Centro de control"],
       visitsData.currentValue
     );
-      // const mostExpensive = await getMostExpensiveData(models);
+    const mostExpensive = await getMostExpensiveData(models);
     const lineData = await geEconomicLineData(models);
     return res.json({
-      // mostExpensive,
+      mostExpensive,
       lineData,
       kpi: visitsStatusesData
     });
@@ -38,7 +37,7 @@ const economicDetailReport = (models) => async (req, res) => {
   try {
     const pieData = await getEconomicPieData(models);
     const rankingData = await getEconomicRankingData(models);
-    const barData = await getEconomicBarData(models);
+    const barData = await getEconomicDetailBarData(models);
     return res.json({ pieData, barData, rankingData });
   } catch (error) {
     console.log("Error", error);
@@ -46,13 +45,13 @@ const economicDetailReport = (models) => async (req, res) => {
   }
 };
 
-const selectEconomicalSum = () =>
-  `SELECT SUM( IFNULL(a.price*ma.quantity , 0.00) ) valor FROM fs_maintenance 
+const selectEconomicalSum = (intersection) =>
+  `SELECT ${intersection ? "intersectionId," : ""} SUM( IFNULL(a.price*ma.quantity , 0.00) ) value FROM fs_maintenance 
 INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = internalid 
 INNER JOIN fs_activity a ON ma.activityId = a.InternalID`
 
-const sumEconomicStatus = (status, date) =>
-  `${selectEconomicalSum()} WHERE a.ActivityType ='${status}' ${date ? "AND " : ""} ${date || ""}`;
+const sumEconomicStatus = ({ status, date, intersection }) =>
+  `${selectEconomicalSum(intersection)} WHERE a.ActivityType ='${status}' ${date ? "AND " : ""} ${date || ""}`;
 
 const getEconomicVisitsData = async (models) => {
   const [oldVisits] = await models.sequelize.query(
@@ -65,9 +64,9 @@ const getEconomicVisitsData = async (models) => {
   );
   const result = {
     title: "Visitas",
-    accumulated: oldVisits.valor || 0,
+    accumulated: oldVisits.value || 0,
     currentDate: localDate,
-    currentValue: currentVisits.valor || 0
+    currentValue: currentVisits.value || 0
   };
   return result;
 };
@@ -75,20 +74,20 @@ const getEconomicVisitsData = async (models) => {
 const getEconomicVisitsStatusesData = (models) => async (statuses, totalMoney) => {
   let statusesData = statuses.map(async (status) => {
     const [accResult] = await models.sequelize.query(
-      sumEconomicStatus(status, betweenOldDates),
+      sumEconomicStatus({ status, date: betweenOldDates }),
       selectType
     );
     const [currentResult] = await models.sequelize.query(
-      sumEconomicStatus(status, betweenCurrentMonth),
+      sumEconomicStatus({ status, date: betweenCurrentMonth }),
       selectType
     );
-    const currentValue = currentResult.valor || 0;
+    const currentValue = currentResult.value || 0;
     const percentage = +((currentValue * 100) / totalMoney).toFixed(2);
     return {
       title: status,
       currentValue,
       percentage: percentage || 0,
-      accumulated: accResult.valor || 0,
+      accumulated: accResult.value || 0,
       currentDate: localDate
     };
   });
@@ -98,28 +97,31 @@ const getEconomicVisitsStatusesData = (models) => async (statuses, totalMoney) =
 
 const getMostExpensiveData = async (models) => {
   const action = mostExpensiveByStatus(models);
-  let statusesData = statuses.map(async status => {
-    const [statusData] = await action(status);
+  let activitiesData = activitiesTypes.map(({ name }) => name).map(async activityName => {
+    const [activityData] = await action(activityName);
+    if (!activityData) return null;
     const [location] = await models.sequelize.query(
         `SELECT * FROM gs_maintenance_cost
-           WHERE internalID = ${statusData.intersectionId}`,
+           WHERE internalID = ${activityData.intersectionId}`,
         selectType
     );
     return {
-      ...statusData,
+      ...activityData,
+      value: +(activityData.value).toFixed(2),
+      title: activityName,
       location: location.mainStreet
-        ? `${statusData.intersectionId} - ${location.mainStreet}/${location.secondStreet}`
+        ? `${activityData.intersectionId} - ${location.mainStreet}/${location.secondStreet}`
         : ""
     }
   }
   )
-  statusesData = await Promise.all(statusesData);
+  activitiesData = await Promise.all(activitiesData);
 
-  return statusesData;
+  return activitiesData;
 };
 
-const getEconomicBarData = async models => {
-  const action = getEconomicBarDataByType(models);
+const getEconomicDetailBarData = async models => {
+  const action = getEconomicDetailBarDataByType(models);
   const data = await Promise.all(
     activitiesTypes.map(({ name, color }) => action({ name, color }))
   );
@@ -141,15 +143,15 @@ const geEconomicLineData = async (models) => {
 
 const mostExpensiveByStatus = (models) => (status) =>
   models.sequelize.query(
-      `${sumEconomicStatus(status)}
+      `${sumEconomicStatus({ status, intersection: true })}
     AND intersectionId not in (8, 901, 902)   
     GROUP BY intersectionId 
-    ORDER BY valor desc
+    ORDER BY value desc
     LIMIT 1`,
       selectType
   );
 
-const getEconomicBarDataByType = (models) => async (
+const getEconomicDetailBarDataByType = (models) => async (
   { name: type, color },
   status = "Aprobada",
   all
@@ -268,7 +270,7 @@ const getEconomicRankingByType = (models) => async (
   };
 
   const queryResult = await models.sequelize.query(
-      `SELECT m.IntersectionID locationId, SUM( IFNULL(a.price*ma.quantity , 0.00) ) valor
+      `SELECT m.IntersectionID locationId, SUM( IFNULL(a.price*ma.quantity , 0.00) ) value
         FROM fs_maintenance m
         INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = m.internalid
         INNER JOIN fs_activity a ON ma.activityId = a.InternalID
@@ -276,14 +278,14 @@ const getEconomicRankingByType = (models) => async (
         AND a.ActivityType = '${type}' 
         AND m.IntersectionID NOT IN (8, 901, 902)
         GROUP BY m.IntersectionID
-        ORDER BY valor desc
+        ORDER BY value desc
         LIMIT 10`,
       selectType
   );
   if (queryResult.length) {
     result.indexes = queryResult.map((r) => ({
       id: String(r.locationId),
-      value: +r.valor.toFixed(2)
+      value: +r.value.toFixed(2)
     }));
   }
   return result;

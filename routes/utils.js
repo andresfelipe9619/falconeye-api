@@ -166,6 +166,7 @@ module.exports = {
   getAverage,
   formatDate,
   formatToUnits,
+  activitiesTypesNames,
   totalActivityType,
   calcPercentage,
   activitiesTypes,

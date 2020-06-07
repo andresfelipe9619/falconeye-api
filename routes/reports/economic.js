@@ -22,9 +22,12 @@ const economicReport = (models) => async (req, res) => {
     );
     const mostExpensive = await getMostExpensiveData(models);
     const lineData = await geEconomicLineData(models);
+    const barData = await getEconomicBarData(models);
+
     return res.json({
       mostExpensive,
       lineData,
+      barData,
       kpi: visitsStatusesData
     });
   } catch (error) {
@@ -119,6 +122,19 @@ const getMostExpensiveData = async (models) => {
 
   return activitiesData;
 };
+const getEconomicBarData = async models => {
+  const pieData = await getEconomicPieData(models, false);
+  const barData = pieData.map(item => {
+    return {
+      assistanceType: item.conName,
+      contratado: item.conCount,
+      contratadoColor: "#4caf50",
+      ejecutado: item.proCount,
+      ejecutadoColor: "#f44336"
+    }
+  })
+  return barData
+}
 
 const getEconomicDetailBarData = async models => {
   const action = getEconomicDetailBarDataByType(models);
@@ -218,9 +234,10 @@ const getEconomicTotalMaintenancesByType = (models) => async (
   return result;
 };
 
-const getEconomicPieData = async (models) => {
+const getEconomicPieData = async (models, all = true) => {
   const action = queryByBudget(models);
-  const promises = [totalActivityType, ...activitiesTypes].map(async ({ name }) => {
+  const allType = all ? [totalActivityType] : []
+  const promises = [...allType, ...activitiesTypes].map(async ({ name }) => {
     const isAll = name => name === "Total"
     const all = isAll(name)
     const activityResult = await action(name, all);

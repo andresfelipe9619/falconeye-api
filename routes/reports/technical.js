@@ -46,8 +46,9 @@ const technicalReport = (models) => async (req, res) => {
 
 const geLineData = async (models) => {
   const action = getTotalMaintenancesByType(models);
+  const mActivitiesTypes = [...activitiesTypes].reverse();
   const data = await Promise.all(
-    activitiesTypes.map(({ name, color }) => action({ name, color }))
+    mActivitiesTypes.map(({ name, color }) => action({ name, color }))
   );
   const total = await action(
     totalActivityType,
@@ -69,7 +70,7 @@ const getTechnicalPieData = async (models) => {
 const getTechnicalRankingData = async (models) => {
   const action = getRankingByType(models);
   const data = await Promise.all(
-    activitiesTypes.reverse().map(({ name, color }) => action({ name, color }))
+    activitiesTypes.map(({ name, color }) => action({ name, color }))
   );
   return data;
 };

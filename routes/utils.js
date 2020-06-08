@@ -13,9 +13,9 @@ const statuses = [
 ];
 
 const activitiesTypes = [
-  { name: "Ingenieria", color: "#ffee58" },
-  { name: "Preventivo", color: "#ef5350" },
-  { name: "Correctivo", color: "#66bb6a" }
+  { name: "Correctivo", color: "#ef5350" },
+  { name: "Preventivo", color: "#66bb6a" },
+  { name: "Ingenieria", color: "#ffee58" }
 ];
 
 const totalActivityType = { name: "Total", color: "#42a5f5" };

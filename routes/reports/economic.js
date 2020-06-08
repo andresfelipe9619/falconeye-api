@@ -146,8 +146,9 @@ const getEconomicDetailBarData = async models => {
 
 const geEconomicLineData = async (models) => {
   const action = getEconomicTotalMaintenancesByType(models);
+  const mActivitiesTypes = [...activitiesTypes].reverse();
   const data = await Promise.all(
-    activitiesTypes.map(({ name, color }) => action({ name, color }))
+    mActivitiesTypes.map(({ name, color }) => action({ name, color }))
   );
   const total = await action(
     totalActivityType,

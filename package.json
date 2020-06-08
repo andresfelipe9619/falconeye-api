@@ -14,7 +14,7 @@
     "start:db": "npm run migrate && npm run seed:all",
     "docker:init": "npm run docker:backup && npm run start:db",
     "docker:build:db": "docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=falconeye --name falconeye-dashboard-db mysql",
-    "docker:backup": "docker exec -i falconeye-dashboard-db  mysql -uroot -proot  falconeye < ./database/backup/fedev0100.sql"
+    "docker:backup": "docker exec -i falconeye-dashboard-db  mysql -uroot -proot  falconeye < ./database/backup/fetes0100.sql"
   },
   "author": "Andrés Suárez",
   "license": "ISC",

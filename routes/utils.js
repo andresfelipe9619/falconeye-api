@@ -136,10 +136,14 @@ const reduceToPieObject = (array) => {
     if (obj.conCount && obj.proCount) {
       obj.conPercentage = calcPercentage(obj.conCount, obj.total);
       obj.proPercentage = calcPercentage(obj.proCount, obj.total);
-    } else if (obj.conCount === 0 && obj.proCount === 0 && index > 0) {
-      obj.proCount = 1;
+    } else if (obj.conCount === 0 && obj.proCount >= 0 && index > 0) {
+      obj.proCount = obj.proCount || 1;
       obj.conPercentage = 0;
       obj.proPercentage = 100;
+    } else if (obj.proCount === 0 && obj.conCount >= 0 && index > 0) {
+      obj.conCount = obj.conCount || 1;
+      obj.proPercentage = 0;
+      obj.conPercentage = 100;
     }
     return obj;
   }, {});

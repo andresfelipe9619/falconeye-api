@@ -21,6 +21,7 @@ const economicReport = (models) => async (req, res) => {
       visitsData.currentValue
     );
     const mostExpensive = await getMostExpensiveData(models);
+    const totalExecuted = await getTotalExecuted(models);
     const lineData = await geEconomicLineData(models);
     const barData = await getEconomicBarData(models);
 
@@ -28,6 +29,7 @@ const economicReport = (models) => async (req, res) => {
       mostExpensive,
       lineData,
       barData,
+      totalExecuted,
       kpi: visitsStatusesData
     });
   } catch (error) {
@@ -73,6 +75,19 @@ const getEconomicVisitsData = async (models) => {
   };
   return result;
 };
+
+const getTotalExecuted = async (models) => {
+  const [total] = await models.sequelize.query(
+   `SELECT 'Ejecutado' name, SUM( IFNULL(a.price*ma.quantity , 0.00) ) value
+   FROM fs_maintenance m
+   INNER JOIN fs_maintenance_activities ma ON ma.maintenanceId = m.internalid
+   INNER JOIN fs_activity a ON ma.activityId = a.InternalID
+   WHERE m.status = 'Aprobada'   `,
+   selectType
+  );
+  if (!(total || {}).value) return 0;
+  return +total.value.toFixed(2);
+}
 
 const getEconomicVisitsStatusesData = (models) => async (statuses, totalMoney) => {
   let statusesData = statuses.map(async (status) => {

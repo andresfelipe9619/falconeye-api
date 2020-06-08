@@ -6,8 +6,15 @@
   "scripts": {
     "start": "nodemon app.js",
     "model:generate": "sequelize model:generate",
-    "start:db": "sequelize db:migrate && sequelize db:seed:all",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "migrate": "sequelize db:migrate",
+    "migrate:undo": "sequelize db:migrate:undo",
+    "seed:all": "npm run seed:gis && npm run seed:dashboard",
+    "seed:gis": "sequelize --seeders-path ./database/seeders/gis db:seed:all",
+    "seed:dashboard": "sequelize --seeders-path ./database/seeders/dashboard db:seed:all",
+    "start:db": "npm run migrate && npm run seed:all",
+    "docker:init": "npm run docker:backup && npm run start:db",
+    "docker:build:db": "docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=falconeye --name falconeye-dashboard-db mysql",
+    "docker:backup": "docker exec -i falconeye-dashboard-db  mysql -uroot -proot  falconeye < ./database/backup/fedev0100.sql"
   },
   "author": "Andrés Suárez",
   "license": "ISC",

@@ -57,11 +57,10 @@ const localDate = capitalize(
   DateTime.local().setLocale("es").toFormat("MMMM yyyy")
 );
 
-const betweenOldDates = `MONTH(startdate) < MONTH(CURRENT_DATE()) 
-AND YEAR(startdate) <= YEAR(CURRENT_DATE())`;
+const betweenOldDates = "DATE_FORMAT(IFNULL(startdate,creationDate), '%Y-%m') <= DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 1 MONTH), '%Y-%m')";
 
-const betweenCurrentMonth = `MONTH(startdate) = MONTH(CURRENT_DATE()) 
-  AND YEAR(startdate) = YEAR(CURRENT_DATE())`;
+const betweenCurrentMonth = `MONTH(IFNULL(startdate,creationDate)) = MONTH(CURRENT_DATE()) 
+  AND YEAR(IFNULL(startdate,creationDate)) = YEAR(CURRENT_DATE())`;
 
 const queryResultToLineData = (queryResult) => {
   const last12MonthsData = completeMissingMonths(queryResult)
@@ -152,8 +151,9 @@ const reduceToPieObject = (array) => {
 const getLast12Months = () => {
   const monthsNumbers = Array.from(Array(12), (_, i) => i + 1);
   const last12Months = monthsNumbers.map((number) => {
-    const dt = DateTime.local()
+    const dt = DateTime.local().setLocale("es")
       .set({ day: 1 })
+      .plus({ months: 1 })
       .minus({ months: number })
       .toISODate();
     return dt;

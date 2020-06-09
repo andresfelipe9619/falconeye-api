@@ -3,7 +3,7 @@ require("dotenv").config()
 module.exports = {
   development: {
     url: process.env.DEV_DATABASE_URL,
-    logging: true,
+    logging: false,
     dialect: "mysql",
     seederStorage: "sequelize"
   },

@@ -205,7 +205,7 @@ const getEconomicDetailBarDataByType = (models) => async (
         AND m.IntersectionID NOT IN (8, 901, 902)
         ${!all ? withType(type) : "AND a.ActivityType NOT IN('Centro de Control')"}
         GROUP BY date
-        ORDER BY date ASC
+        ORDER BY date DESC
         LIMIT 12
         `,
       selectType
@@ -239,7 +239,7 @@ const getEconomicTotalMaintenancesByType = (models) => async (
         AND m.IntersectionID NOT IN (8, 901, 902)
         AND m.startdate <= NOW() and m.startdate >= Date_add(Now(),interval - 12 month)
         GROUP BY DATE_FORMAT(m.startdate, "%Y-%m-01")
-        ORDER BY date ASC
+        ORDER BY date DESC
         LIMIT 12;
         `,
       selectType

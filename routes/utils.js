@@ -15,7 +15,7 @@ const statuses = [
 const activitiesTypes = [
   { name: "Correctivo", color: "#ef5350" },
   { name: "Preventivo", color: "#66bb6a" },
-  { name: "Ingenieria", color: "#ffee58" }
+  { name: "Ingeniería", color: "#ffee58" }
 ];
 
 const totalActivityType = { name: "Total", color: "#42a5f5" };
@@ -110,9 +110,10 @@ const reduceToPieObject = (array) => {
   return array.reduce((acc, item, index) => {
     let obj = {};
     if (!item.label && !item.status) return obj;
+    const isActivityType = activitiesTypesNames.includes(item.status);
     const isStatusRed =
       item.status.includes("Espera") ||
-      activitiesTypesNames.includes(item.status) ||
+      isActivityType ||
       item.status.includes("Pendiente");
     if (isStatusRed) {
       obj = {
@@ -133,8 +134,14 @@ const reduceToPieObject = (array) => {
     }
     obj.total = (acc.total || 0) + item.count;
     if (obj.conCount && obj.proCount) {
-      obj.conPercentage = calcPercentage(obj.conCount, obj.total);
-      obj.proPercentage = calcPercentage(obj.proCount, obj.total);
+      let total = obj.total;
+      let { conCount } = obj
+      if (isActivityType) {
+        total = obj.conCount;
+        conCount = total - obj.proCount;
+      }
+      obj.conPercentage = calcPercentage(conCount, total);
+      obj.proPercentage = calcPercentage(obj.proCount, total);
     } else if (obj.conCount === 0 && obj.proCount >= 0 && index > 0) {
       obj.proCount = obj.proCount || 1;
       obj.conPercentage = 0;

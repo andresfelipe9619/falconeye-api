@@ -72,7 +72,7 @@ const queryResultToLineData = (queryResult) => {
 };
 
 const queryResultToBarData = (queryResult) => {
-  const last12MonthsData = completeMissingMonths(queryResult)
+  const last12MonthsData = completeMissingMonths(queryResult, 12)
   const data = last12MonthsData.map((r) => ({
     value: r.count,
     date: formatDate(r.date)
@@ -87,9 +87,9 @@ const getAverage = values => {
   return +values.toFixed(2);
 }
 
-const completeMissingMonths = (queryResult) => {
-  const last12Months = getLast12Months();
-  const last12MonthsData = last12Months
+const completeMissingMonths = (queryResult, numberMonths) => {
+  const lastMonths = getLastMonths(numberMonths);
+  const lastMonthsData = lastMonths
     .map((prevMonth) => {
       const found = queryResult.find(({ date }) => date === prevMonth);
       if (found) {
@@ -98,7 +98,7 @@ const completeMissingMonths = (queryResult) => {
       return { count: 0, date: prevMonth };
     })
     .reverse();
-  return last12MonthsData
+  return lastMonthsData
 }
 
 const calcPercentage = (x, count) => +((x * 100) / count).toFixed(2);
@@ -155,8 +155,8 @@ const reduceToPieObject = (array) => {
   }, {});
 };
 
-const getLast12Months = () => {
-  const monthsNumbers = Array.from(Array(12), (_, i) => i + 1);
+const getLastMonths = (numberMonths = 48) => {
+  const monthsNumbers = Array.from(Array(numberMonths), (_, i) => i + 1);
   const last12Months = monthsNumbers.map((number) => {
     const dt = DateTime.local().setLocale("es")
       .set({ day: 1 })

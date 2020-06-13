@@ -43,7 +43,9 @@ const economicDetailReport = (models) => async (req, res) => {
     const pieData = await getEconomicPieData(models);
     const rankingData = await getEconomicRankingData(models);
     const barData = await getEconomicDetailBarData(models);
-    return res.json({ pieData, barData, rankingData });
+    const lineData = await geEconomicLineData(models);
+
+    return res.json({ pieData, barData, lineData, rankingData });
   } catch (error) {
     console.log("Error", error);
     return res.status(500).send(error);
@@ -237,10 +239,10 @@ const getEconomicTotalMaintenancesByType = (models) => async (
         WHERE m.status = '${status}' 
         ${!all ? withType(type) : "AND a.ActivityType NOT IN('Centro de Control')"}
         AND m.IntersectionID NOT IN (8, 901, 902)
-        AND m.startdate <= NOW() and m.startdate >= Date_add(Now(),interval - 12 month)
+        AND m.startdate <= NOW() and m.startdate >= Date_add(Now(),interval - 48 month)
         GROUP BY DATE_FORMAT(m.startdate, "%Y-%m-01")
         ORDER BY date DESC
-        LIMIT 12;
+        LIMIT 48;
         `,
       selectType
   );

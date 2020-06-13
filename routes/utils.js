@@ -1,5 +1,5 @@
 const Sequelize = require("sequelize");
-const { DateTime } = require("luxon");
+const { DateTime, Interval } = require("luxon");
 const { QueryTypes } = Sequelize;
 
 const statuses = [
@@ -72,7 +72,7 @@ const queryResultToLineData = (queryResult) => {
 };
 
 const queryResultToBarData = (queryResult) => {
-  const last12MonthsData = completeMissingMonths(queryResult, 12)
+  const last12MonthsData = completeMissingMonths(queryResult)
   const data = last12MonthsData.map((r) => ({
     value: r.count,
     date: formatDate(r.date)
@@ -155,8 +155,15 @@ const reduceToPieObject = (array) => {
   }, {});
 };
 
-const getLastMonths = (numberMonths = 48) => {
-  const monthsNumbers = Array.from(Array(numberMonths), (_, i) => i + 1);
+const getLastMonths = (numberMonths) => {
+  let arraySize = numberMonths;
+  if (!arraySize) {
+    const now = DateTime.local().set({ day: 1 });
+    const before = DateTime.local(2019, 4, 1);
+    const i = Interval.fromDateTimes(before, now);
+    arraySize = +i.length("months").toFixed(0)
+  }
+  const monthsNumbers = Array.from(Array(arraySize), (_, i) => i + 1);
   const last12Months = monthsNumbers.map((number) => {
     const dt = DateTime.local().setLocale("es")
       .set({ day: 1 })

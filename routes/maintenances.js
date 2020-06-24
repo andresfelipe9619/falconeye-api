@@ -4,6 +4,7 @@ module.exports = (models) => {
   router.get("/", async (req, res) => {
     try {
       let maintenances = await models.gs_maintenance_cost.findAll({
+        include: [{ model: models.fs_maintenance }],
         order: [["internalID", "ASC"]]
       });
       maintenances = maintenances.map((m) => {

@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
   );
   gs_maintenance_cost.associate = function (models) {
     // associations can be defined here
+    gs_maintenance_cost.hasOne(models.fs_maintenance, {
+      foreignKey: "internalID",
+      otherKey: "internalID"
+    })
   };
   return gs_maintenance_cost;
 };

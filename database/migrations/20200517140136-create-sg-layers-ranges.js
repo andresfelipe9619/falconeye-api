@@ -20,7 +20,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "sg_numRanges",
+          model: "sg_numranges",
           field: "id",
         },
       },

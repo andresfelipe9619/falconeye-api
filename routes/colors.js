@@ -8,7 +8,7 @@ module.exports = (models) => {
       let layers = await models.sg_layers.findAll({
         where: Sequelize.where(
           Sequelize.col("sg_layers.id"),
-          Sequelize.col("sg_numRanges->sg_markers->sg_layers_ranges.layersId")
+          Sequelize.col("sg_numranges->sg_markers->sg_layers_ranges.layersId")
         ),
         attributes: defaultAttributes,
         include: [
@@ -20,7 +20,7 @@ module.exports = (models) => {
           },
           {
             required: true,
-            model: models.sg_numRanges,
+            model: models.sg_numranges,
             attributes: defaultAttributes,
             through: { attributes: [] },
             include: [

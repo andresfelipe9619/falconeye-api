@@ -1,17 +1,17 @@
 "use strict";
 module.exports = (sequelize, DataTypes) => {
-  const sg_numRanges = sequelize.define(
-    "sg_numRanges",
+  const sg_numranges = sequelize.define(
+    "sg_numranges",
     {
       name: DataTypes.STRING,
-      displayName: DataTypes.STRING,
+      displayName: DataTypes.STRING
     },
     {
-      tableName: "sg_numRanges",
+      tableName: "sg_numranges"
     }
   );
-  sg_numRanges.associate = function (models) {
+  sg_numranges.associate = function (models) {
     // associations can be defined here
   };
-  return sg_numRanges;
+  return sg_numranges;
 };

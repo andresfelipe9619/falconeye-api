@@ -9,7 +9,8 @@ const statuses = [
   "No Aprobada",
   "No Autorizada",
   "Espera de Ejecución",
-  "Pendiente de Aprobación"
+  "Pendiente de Aprobación",
+  "Pendiente de Autorización"
 ];
 
 const activitiesTypes = [

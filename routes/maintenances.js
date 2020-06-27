@@ -1,12 +1,21 @@
 const express = require("express");
 const router = express.Router();
 module.exports = (models) => {
-  router.get("/", async (req, res) => {
+  router.get("/economic", getEconomicLayer);
+  router.get("/technical", getTechnicalLayer);
+
+  const getMaintenances = () => models.gs_maintenance_cost.findAll({
+    include: [{ model: models.fs_maintenance }],
+    order: [["internalID", "ASC"]]
+  });
+
+  async function getTechnicalLayer (req, res) {
+
+  }
+
+  async function getEconomicLayer (req, res) {
     try {
-      let maintenances = await models.gs_maintenance_cost.findAll({
-        include: [{ model: models.fs_maintenance }],
-        order: [["internalID", "ASC"]]
-      });
+      let maintenances = await getMaintenances()
       maintenances = maintenances.map((m) => {
         m = m.toJSON();
         return {
@@ -71,6 +80,6 @@ module.exports = (models) => {
       console.log("error", error);
       return res.status(500).send(error.message);
     }
-  });
+  }
   return router;
 };

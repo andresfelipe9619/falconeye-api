@@ -19,8 +19,8 @@ module.exports = (sequelize, DataTypes) => {
   fs_maintenance.associate = function (models) {
     // associations can be defined here
     fs_maintenance.belongsTo(models.gs_maintenance_cost, {
-      foreignKey: "internalID",
-      otherKey: "internalID"
+      foreignKey: "intersectionID",
+      otherKey: "intersectionID"
     })
   };
   return fs_maintenance;

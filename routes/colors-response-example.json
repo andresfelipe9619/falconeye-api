@@ -1,0 +1,744 @@
+[
+  {
+    "id": 1,
+    "name": "General",
+    "property": "default",
+    "description": "Muestra por categorias",
+    "state": "Y",
+    "sg_attributes": [
+      {
+        "id": 1,
+        "name": "Centro",
+        "property": "center",
+        "sg_layers_attributes": {
+          "color": "#3D3D3D",
+          "layersId": 1,
+          "attributesId": 1
+        }
+      },
+      {
+        "id": 2,
+        "name": "Correctivo",
+        "property": "corrective",
+        "sg_layers_attributes": {
+          "color": "#CB2B3E",
+          "layersId": 1,
+          "attributesId": 2
+        }
+      },
+      {
+        "id": 3,
+        "name": "Ingeniería",
+        "property": "engineering",
+        "sg_layers_attributes": {
+          "color": "#FFD326",
+          "layersId": 1,
+          "attributesId": 3
+        }
+      },
+      {
+        "id": 4,
+        "name": "Preventivo",
+        "property": "preventive",
+        "sg_layers_attributes": {
+          "color": "#2AAD27",
+          "layersId": 1,
+          "attributesId": 4
+        }
+      },
+      {
+        "id": 5,
+        "name": "Equipos",
+        "property": "equipment",
+        "sg_layers_attributes": {
+          "color": "#2A81CB",
+          "layersId": 1,
+          "attributesId": 5
+        }
+      },
+      {
+        "id": 6,
+        "name": "Materiales",
+        "property": "materials",
+        "sg_layers_attributes": {
+          "color": "#7B7B7B",
+          "layersId": 1,
+          "attributesId": 6
+        }
+      },
+      {
+        "id": 7,
+        "name": "Servicios",
+        "property": "services",
+        "sg_layers_attributes": {
+          "color": "#9C2BCB",
+          "layersId": 1,
+          "attributesId": 7
+        }
+      }
+    ],
+    "sg_numranges": [
+      {
+        "id": 1,
+        "name": "Rango1",
+        "displayName": "0 - 25%",
+        "sg_markers": [
+          { "id": 4, "name": "Mark4", "colorName": "Green", "color": "#2AAD27" }
+        ]
+      },
+      {
+        "id": 2,
+        "name": "Rango2",
+        "displayName": "25 - 50%",
+        "sg_markers": [
+          { "id": 2, "name": "Mark2", "colorName": "Gold", "color": "#FFD326" }
+        ]
+      },
+      {
+        "id": 3,
+        "name": "Rango3",
+        "displayName": "50 - 75%",
+        "sg_markers": [
+          {
+            "id": 5,
+            "name": "Mark5",
+            "colorName": "Orange",
+            "color": "#CB8427"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "name": "Rango4",
+        "displayName": "75 - 100%",
+        "sg_markers": [
+          { "id": 3, "name": "Mark3", "colorName": "Red", "color": "#CB2B3E" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Rango monetario",
+    "property": "monetary-range",
+    "description": "Muestra por Rangos monetario",
+    "state": "Y",
+    "sg_attributes": [
+      {
+        "id": 1,
+        "name": "Centro",
+        "property": "center",
+        "sg_layers_attributes": {
+          "color": "#3D3D3D",
+          "layersId": 2,
+          "attributesId": 1
+        }
+      },
+      {
+        "id": 2,
+        "name": "Correctivo",
+        "property": "corrective",
+        "sg_layers_attributes": {
+          "color": "#CB2B3E",
+          "layersId": 2,
+          "attributesId": 2
+        }
+      },
+      {
+        "id": 3,
+        "name": "Ingeniería",
+        "property": "engineering",
+        "sg_layers_attributes": {
+          "color": "#FFD326",
+          "layersId": 2,
+          "attributesId": 3
+        }
+      },
+      {
+        "id": 4,
+        "name": "Preventivo",
+        "property": "preventive",
+        "sg_layers_attributes": {
+          "color": "#2AAD27",
+          "layersId": 2,
+          "attributesId": 4
+        }
+      },
+      {
+        "id": 5,
+        "name": "Equipos",
+        "property": "equipment",
+        "sg_layers_attributes": {
+          "color": "#2A81CB",
+          "layersId": 2,
+          "attributesId": 5
+        }
+      },
+      {
+        "id": 6,
+        "name": "Materiales",
+        "property": "materials",
+        "sg_layers_attributes": {
+          "color": "#7B7B7B",
+          "layersId": 2,
+          "attributesId": 6
+        }
+      },
+      {
+        "id": 7,
+        "name": "Servicios",
+        "property": "services",
+        "sg_layers_attributes": {
+          "color": "#9C2BCB",
+          "layersId": 2,
+          "attributesId": 7
+        }
+      }
+    ],
+    "sg_numranges": [
+      {
+        "id": 1,
+        "name": "Rango1",
+        "displayName": "0 - 25%",
+        "sg_markers": [
+          { "id": 4, "name": "Mark4", "colorName": "Green", "color": "#2AAD27" }
+        ]
+      },
+      {
+        "id": 2,
+        "name": "Rango2",
+        "displayName": "25 - 50%",
+        "sg_markers": [
+          { "id": 2, "name": "Mark2", "colorName": "Gold", "color": "#FFD326" }
+        ]
+      },
+      {
+        "id": 3,
+        "name": "Rango3",
+        "displayName": "50 - 75%",
+        "sg_markers": [
+          {
+            "id": 5,
+            "name": "Mark5",
+            "colorName": "Orange",
+            "color": "#CB8427"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "name": "Rango4",
+        "displayName": "75 - 100%",
+        "sg_markers": [
+          { "id": 3, "name": "Mark3", "colorName": "Red", "color": "#CB2B3E" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Cantidad de órdenes",
+    "property": "orders-range",
+    "description": "Muestra por Rangos de cantidad de órdenes",
+    "state": "Y",
+    "sg_attributes": [
+      {
+        "id": 1,
+        "name": "Centro",
+        "property": "center",
+        "sg_layers_attributes": {
+          "color": "#3D3D3D",
+          "layersId": 3,
+          "attributesId": 1
+        }
+      },
+      {
+        "id": 2,
+        "name": "Correctivo",
+        "property": "corrective",
+        "sg_layers_attributes": {
+          "color": "#CB2B3E",
+          "layersId": 3,
+          "attributesId": 2
+        }
+      },
+      {
+        "id": 3,
+        "name": "Ingeniería",
+        "property": "engineering",
+        "sg_layers_attributes": {
+          "color": "#FFD326",
+          "layersId": 3,
+          "attributesId": 3
+        }
+      },
+      {
+        "id": 4,
+        "name": "Preventivo",
+        "property": "preventive",
+        "sg_layers_attributes": {
+          "color": "#2AAD27",
+          "layersId": 3,
+          "attributesId": 4
+        }
+      },
+      {
+        "id": 5,
+        "name": "Equipos",
+        "property": "equipment",
+        "sg_layers_attributes": {
+          "color": "#2A81CB",
+          "layersId": 3,
+          "attributesId": 5
+        }
+      },
+      {
+        "id": 6,
+        "name": "Materiales",
+        "property": "materials",
+        "sg_layers_attributes": {
+          "color": "#7B7B7B",
+          "layersId": 3,
+          "attributesId": 6
+        }
+      },
+      {
+        "id": 7,
+        "name": "Servicios",
+        "property": "services",
+        "sg_layers_attributes": {
+          "color": "#9C2BCB",
+          "layersId": 3,
+          "attributesId": 7
+        }
+      }
+    ],
+    "sg_numranges": [
+      {
+        "id": 1,
+        "name": "Rango1",
+        "displayName": "0 - 25%",
+        "sg_markers": [
+          { "id": 4, "name": "Mark4", "colorName": "Green", "color": "#2AAD27" }
+        ]
+      },
+      {
+        "id": 2,
+        "name": "Rango2",
+        "displayName": "25 - 50%",
+        "sg_markers": [
+          { "id": 2, "name": "Mark2", "colorName": "Gold", "color": "#FFD326" }
+        ]
+      },
+      {
+        "id": 3,
+        "name": "Rango3",
+        "displayName": "50 - 75%",
+        "sg_markers": [
+          {
+            "id": 5,
+            "name": "Mark5",
+            "colorName": "Orange",
+            "color": "#CB8427"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "name": "Rango4",
+        "displayName": "75 - 100%",
+        "sg_markers": [
+          { "id": 3, "name": "Mark3", "colorName": "Red", "color": "#CB2B3E" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "General",
+    "property": "default-tech",
+    "description": "",
+    "state": "Y",
+    "sg_attributes": [
+      {
+        "id": 1,
+        "name": "Centro",
+        "property": "center",
+        "sg_layers_attributes": {
+          "color": "#3D3D3D",
+          "layersId": 4,
+          "attributesId": 1
+        }
+      },
+      {
+        "id": 2,
+        "name": "Correctivo",
+        "property": "corrective",
+        "sg_layers_attributes": {
+          "color": "#CB2B3E",
+          "layersId": 4,
+          "attributesId": 2
+        }
+      },
+      {
+        "id": 3,
+        "name": "Ingeniería",
+        "property": "engineering",
+        "sg_layers_attributes": {
+          "color": "#FFD326",
+          "layersId": 4,
+          "attributesId": 3
+        }
+      },
+      {
+        "id": 4,
+        "name": "Preventivo",
+        "property": "preventive",
+        "sg_layers_attributes": {
+          "color": "#2AAD27",
+          "layersId": 4,
+          "attributesId": 4
+        }
+      },
+      {
+        "id": 5,
+        "name": "Equipos",
+        "property": "equipment",
+        "sg_layers_attributes": {
+          "color": "#2A81CB",
+          "layersId": 4,
+          "attributesId": 5
+        }
+      },
+      {
+        "id": 6,
+        "name": "Materiales",
+        "property": "materials",
+        "sg_layers_attributes": {
+          "color": "#7B7B7B",
+          "layersId": 4,
+          "attributesId": 6
+        }
+      },
+      {
+        "id": 7,
+        "name": "Servicios",
+        "property": "services",
+        "sg_layers_attributes": {
+          "color": "#9C2BCB",
+          "layersId": 4,
+          "attributesId": 7
+        }
+      }
+    ],
+    "sg_numranges": [
+      {
+        "id": 5,
+        "name": "RangoTech1",
+        "displayName": "Without status",
+        "sg_markers": [
+          { "id": 1, "name": "Mark1", "colorName": "Blue", "color": "#2A81CB" }
+        ]
+      },
+      {
+        "id": 6,
+        "name": "RangoTech1",
+        "displayName": "With status",
+        "sg_markers": [
+          { "id": 3, "name": "Mark3", "colorName": "Red", "color": "#CB2B3E" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Espera de Ejecución",
+    "property": "exec-range-tech",
+    "description": "",
+    "state": "Y",
+    "sg_attributes": [
+      {
+        "id": 1,
+        "name": "Centro",
+        "property": "center",
+        "sg_layers_attributes": {
+          "color": "#3D3D3D",
+          "layersId": 5,
+          "attributesId": 1
+        }
+      },
+      {
+        "id": 2,
+        "name": "Correctivo",
+        "property": "corrective",
+        "sg_layers_attributes": {
+          "color": "#CB2B3E",
+          "layersId": 5,
+          "attributesId": 2
+        }
+      },
+      {
+        "id": 3,
+        "name": "Ingeniería",
+        "property": "engineering",
+        "sg_layers_attributes": {
+          "color": "#FFD326",
+          "layersId": 5,
+          "attributesId": 3
+        }
+      },
+      {
+        "id": 4,
+        "name": "Preventivo",
+        "property": "preventive",
+        "sg_layers_attributes": {
+          "color": "#2AAD27",
+          "layersId": 5,
+          "attributesId": 4
+        }
+      },
+      {
+        "id": 5,
+        "name": "Equipos",
+        "property": "equipment",
+        "sg_layers_attributes": {
+          "color": "#2A81CB",
+          "layersId": 5,
+          "attributesId": 5
+        }
+      },
+      {
+        "id": 6,
+        "name": "Materiales",
+        "property": "materials",
+        "sg_layers_attributes": {
+          "color": "#7B7B7B",
+          "layersId": 5,
+          "attributesId": 6
+        }
+      },
+      {
+        "id": 7,
+        "name": "Servicios",
+        "property": "services",
+        "sg_layers_attributes": {
+          "color": "#9C2BCB",
+          "layersId": 5,
+          "attributesId": 7
+        }
+      }
+    ],
+    "sg_numranges": [
+      {
+        "id": 5,
+        "name": "RangoTech1",
+        "displayName": "Without status",
+        "sg_markers": [
+          { "id": 1, "name": "Mark1", "colorName": "Blue", "color": "#2A81CB" }
+        ]
+      },
+      {
+        "id": 6,
+        "name": "RangoTech1",
+        "displayName": "With status",
+        "sg_markers": [
+          { "id": 3, "name": "Mark3", "colorName": "Red", "color": "#CB2B3E" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Pendiente de Autorización",
+    "property": "auth-range-tech",
+    "description": "",
+    "state": "Y",
+    "sg_attributes": [
+      {
+        "id": 1,
+        "name": "Centro",
+        "property": "center",
+        "sg_layers_attributes": {
+          "color": "#3D3D3D",
+          "layersId": 6,
+          "attributesId": 1
+        }
+      },
+      {
+        "id": 2,
+        "name": "Correctivo",
+        "property": "corrective",
+        "sg_layers_attributes": {
+          "color": "#CB2B3E",
+          "layersId": 6,
+          "attributesId": 2
+        }
+      },
+      {
+        "id": 3,
+        "name": "Ingeniería",
+        "property": "engineering",
+        "sg_layers_attributes": {
+          "color": "#FFD326",
+          "layersId": 6,
+          "attributesId": 3
+        }
+      },
+      {
+        "id": 4,
+        "name": "Preventivo",
+        "property": "preventive",
+        "sg_layers_attributes": {
+          "color": "#2AAD27",
+          "layersId": 6,
+          "attributesId": 4
+        }
+      },
+      {
+        "id": 5,
+        "name": "Equipos",
+        "property": "equipment",
+        "sg_layers_attributes": {
+          "color": "#2A81CB",
+          "layersId": 6,
+          "attributesId": 5
+        }
+      },
+      {
+        "id": 6,
+        "name": "Materiales",
+        "property": "materials",
+        "sg_layers_attributes": {
+          "color": "#7B7B7B",
+          "layersId": 6,
+          "attributesId": 6
+        }
+      },
+      {
+        "id": 7,
+        "name": "Servicios",
+        "property": "services",
+        "sg_layers_attributes": {
+          "color": "#9C2BCB",
+          "layersId": 6,
+          "attributesId": 7
+        }
+      }
+    ],
+    "sg_numranges": [
+      {
+        "id": 5,
+        "name": "RangoTech1",
+        "displayName": "Without status",
+        "sg_markers": [
+          { "id": 1, "name": "Mark1", "colorName": "Blue", "color": "#2A81CB" }
+        ]
+      },
+      {
+        "id": 6,
+        "name": "RangoTech1",
+        "displayName": "With status",
+        "sg_markers": [
+          { "id": 3, "name": "Mark3", "colorName": "Red", "color": "#CB2B3E" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Pendiente de Aprobación",
+    "property": "appr-range-tech",
+    "description": "",
+    "state": "Y",
+    "sg_attributes": [
+      {
+        "id": 1,
+        "name": "Centro",
+        "property": "center",
+        "sg_layers_attributes": {
+          "color": "#3D3D3D",
+          "layersId": 7,
+          "attributesId": 1
+        }
+      },
+      {
+        "id": 2,
+        "name": "Correctivo",
+        "property": "corrective",
+        "sg_layers_attributes": {
+          "color": "#CB2B3E",
+          "layersId": 7,
+          "attributesId": 2
+        }
+      },
+      {
+        "id": 3,
+        "name": "Ingeniería",
+        "property": "engineering",
+        "sg_layers_attributes": {
+          "color": "#FFD326",
+          "layersId": 7,
+          "attributesId": 3
+        }
+      },
+      {
+        "id": 4,
+        "name": "Preventivo",
+        "property": "preventive",
+        "sg_layers_attributes": {
+          "color": "#2AAD27",
+          "layersId": 7,
+          "attributesId": 4
+        }
+      },
+      {
+        "id": 5,
+        "name": "Equipos",
+        "property": "equipment",
+        "sg_layers_attributes": {
+          "color": "#2A81CB",
+          "layersId": 7,
+          "attributesId": 5
+        }
+      },
+      {
+        "id": 6,
+        "name": "Materiales",
+        "property": "materials",
+        "sg_layers_attributes": {
+          "color": "#7B7B7B",
+          "layersId": 7,
+          "attributesId": 6
+        }
+      },
+      {
+        "id": 7,
+        "name": "Servicios",
+        "property": "services",
+        "sg_layers_attributes": {
+          "color": "#9C2BCB",
+          "layersId": 7,
+          "attributesId": 7
+        }
+      }
+    ],
+    "sg_numranges": [
+      {
+        "id": 5,
+        "name": "RangoTech1",
+        "displayName": "Without status",
+        "sg_markers": [
+          { "id": 1, "name": "Mark1", "colorName": "Blue", "color": "#2A81CB" }
+        ]
+      },
+      {
+        "id": 6,
+        "name": "RangoTech1",
+        "displayName": "With status",
+        "sg_markers": [
+          { "id": 3, "name": "Mark3", "colorName": "Red", "color": "#CB2B3E" }
+        ]
+      }
+    ]
+  }
+]

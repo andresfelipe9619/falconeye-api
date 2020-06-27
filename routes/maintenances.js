@@ -9,6 +9,38 @@ module.exports = (models) => {
     order: [["internalID", "ASC"]]
   });
 
+  const getLayerRanges = (values, log) => {
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+    const rangeCount = 4;
+    const difference = Math.ceil(
+      (max - min) / rangeCount
+    );
+    let rangeValue = difference;
+    if (log) {
+      const pow = Math.pow(10, log10(difference) - 1);
+      rangeValue = Math.round(difference / pow) * pow;
+    }
+    const ranges = new Array(rangeCount + 1).fill(0).map((_, i) => {
+      if (i === 0) return min;
+      return Math.ceil(rangeValue * i + min);
+    });
+    return ranges;
+  }
+
+  const log10 = (n) => Math.floor((100 * Math.log(n)) / Math.log(10) / 100);
+
+  const sum = (list, prop) =>
+    list.reduce((acc, item) => acc + item[prop], 0);
+
+  const setTotalCosts = (m) => {
+    m = m.toJSON();
+    return {
+      ...m,
+      totalCosts: m.equipments + m.materials + m.services
+    };
+  }
+
   async function getTechnicalLayer (req, res) {
 
   }
@@ -16,39 +48,13 @@ module.exports = (models) => {
   async function getEconomicLayer (req, res) {
     try {
       let maintenances = await getMaintenances()
-      maintenances = maintenances.map((m) => {
-        m = m.toJSON();
-        return {
-          ...m,
-          totalCosts: m.equipments + m.materials + m.services
-        };
-      });
+      maintenances = maintenances.map(setTotalCosts);
 
       const maintenancesOrders = maintenances.map((m) => m.orders);
-      const maxOrder = Math.max(...maintenancesOrders);
-      const minOrder = Math.min(...maintenancesOrders);
-      const rangeCountOrder = 4;
-      const rangeValueOrder = Math.ceil(
-        (maxOrder - minOrder) / rangeCountOrder
-      );
-      const rangesOrder = new Array(rangeCountOrder + 1).fill(0).map((_, i) => {
-        if (i === 0) return minOrder;
-        return Math.ceil(rangeValueOrder * i + minOrder);
-      });
-      const log10 = (n) => Math.floor((100 * Math.log(n)) / Math.log(10) / 100);
+      const rangesOrder = getLayerRanges(maintenancesOrders);
+
       const maintenancesCosts = maintenances.map((m) => m.totalCosts);
-      const maxCost = Math.max(...maintenancesCosts);
-      const minCost = Math.min(...maintenancesCosts);
-      const rangeCount = 4;
-      const difference = Math.ceil((maxCost - minCost) / rangeCount);
-      const pow = Math.pow(10, log10(difference) - 1);
-      const rangeValue = Math.round(difference / pow) * pow;
-      const ranges = new Array(rangeCount + 1).fill(0).map((_, i) => {
-        if (i === 0) return minCost;
-        return Math.ceil(rangeValue * i + minCost);
-      });
-      const sum = (list, prop) =>
-        list.reduce((acc, item) => acc + item[prop], 0);
+      const ranges = getLayerRanges(maintenancesCosts, true)
 
       const totalOrders = sum(maintenances, "orders");
       const totalCosts = sum(maintenances, "totalCosts");
@@ -61,10 +67,6 @@ module.exports = (models) => {
 
       return res.status(200).json({
         ranges,
-        minCost,
-        maxCost,
-        maxOrder,
-        minOrder,
         totalCosts,
         totalOrders,
         rangesOrder,
